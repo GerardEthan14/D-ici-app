@@ -1,0 +1,30 @@
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede8df;
+  --bg3: #e4ddd2;
+  --card: #ffffff;
+  --ink: #1c1a15;
+  --ink2: #4a4540;
+  --ink3: #8a847c;
+  --accent: #2d6a4f;
+  --accent2: #40916c;
+  --red: #c1121f;
+  --red-light: #fde8e9;
+  --orange: #e07b2a;
+  --orange-light: #fef0e0;
+  --green: #2d6a4f;
+  --green-light: #d8f3dc;
+  --blue: #1d6fa4;
+  --blue-light: #dbeeff;
+  --yellow: #e6a817;
+  --yellow-light: #fef7e0;
+  --border: #d8d0c4;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.14);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --nav-h: 72px;
+  --xp: #4a9e3f;
+  --xp-dark: #2d6a2a;
+  --dark-bg: #12101e;
+}
