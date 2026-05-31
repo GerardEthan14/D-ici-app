@@ -850,3 +850,138 @@
   border-radius: 999px;
   cursor: pointer;
 }
+
+/* =========================================================
+   STOCK PANEL (rotation par rayon)
+   ========================================================= */
+.stock-week-head {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.stock-week-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stock-week-rayon {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin: 4px 0 12px;
+}
+.stock-week-progress { display: flex; align-items: center; gap: 10px; }
+.stock-week-progress .mini-bar-track { flex: 1; width: auto; }
+.stock-week-count { font-size: 0.78rem; font-weight: 700; color: var(--ink3); flex-shrink: 0; }
+.stock-week-done {
+  margin-top: 12px;
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.86rem;
+  text-align: center;
+  padding: 8px;
+  border-radius: 10px;
+}
+.stock-check-list { padding: 4px 0; }
+.stock-check-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bg2);
+}
+.stock-check-row:last-child { border-bottom: none; }
+.stock-check-row.checked .stock-check-name { text-decoration: line-through; opacity: 0.5; }
+.stock-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.stock-check svg { width: 14px; height: 14px; stroke: #fff; opacity: 0; transition: opacity 0.15s; }
+.stock-check.checked { background: var(--green); border-color: var(--green); }
+.stock-check.checked svg { opacity: 1; }
+.stock-check-body { flex: 1; min-width: 0; }
+.stock-check-name { font-weight: 500; font-size: 0.95rem; color: var(--ink); }
+.stock-check-bc { font-size: 0.72rem; color: var(--ink3); margin-top: 2px; }
+.stock-next {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--ink3);
+}
+.stock-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+/* RAYON cards (gestion) */
+.rayon-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.rayon-card-head { display: flex; align-items: center; gap: 10px; }
+.rayon-order {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--dark-bg);
+  color: var(--xp);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rayon-name {
+  flex: 1;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.rayon-actions { display: flex; gap: 4px; align-items: center; }
+.rayon-actions .icon-btn[disabled] { opacity: 0.3; pointer-events: none; }
+.rayon-meta { font-size: 0.76rem; color: var(--ink3); margin: 8px 0 0 36px; }
+.rayon-items { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0 36px; }
+.rayon-item-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg2);
+  border-radius: 999px;
+  padding: 3px 6px 3px 10px;
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+.rayon-item-del {
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ink3);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-sm { padding: 7px 12px; font-size: 0.8rem; }
+.rayon-card .btn-sm { margin-top: 10px; }

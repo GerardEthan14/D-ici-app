@@ -32,6 +32,8 @@ export const SHARED = {
   products: [],
   vrac: [],
   zones: {},
+  rayons: [],
+  stockItems: [],
 };
 
 export const app = {

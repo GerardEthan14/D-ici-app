@@ -127,7 +127,7 @@ export async function fbUpdateOrLocal(collection, id, data) {
 
 /* ── Subscriptions ──────────────────────────────────── */
 
-const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac"];
+const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac", "rayons", "stockItems"];
 
 function unsubscribeAll() {
   _unsubscribers.forEach((unsub) => unsub());

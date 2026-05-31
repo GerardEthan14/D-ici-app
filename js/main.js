@@ -62,6 +62,13 @@ import {
   showSupplierCombo,
 } from "./modals.js";
 import { bindProductSuggestions } from "./productCatalog.js";
+import {
+  switchStockView,
+  addRayon,
+  saveEditRayon,
+  addStockItem,
+  bindStockEvents,
+} from "./stock.js";
 import { switchPanel, fabContextualOpen } from "./nav.js";
 
 /* ── Event bindings ─────────────────────────────────── */
@@ -83,9 +90,13 @@ function bindComboInputs(pairs, handler) {
 
 function bindAll() {
   // Nav
-  ["todo", "dlc", "fournisseurs", "reserve", "profil"].forEach((p) =>
+  ["todo", "dlc", "fournisseurs", "reserve", "stock", "profil"].forEach((p) =>
     bindClick("nav-" + p, () => switchPanel(p))
   );
+
+  // Stock sub-tabs
+  bindClick("stab-week", () => switchStockView("week"));
+  bindClick("stab-rayons", () => switchStockView("rayons"));
 
   // Todo tabs / filters
   bindClick("ttab-personal", () => switchTodoTab("personal"));
@@ -121,6 +132,9 @@ function bindAll() {
   bindClick("btn-add-todo", addTodo);
   bindClick("btn-add-dlc", addDlc);
   bindClick("btn-add-supplier", addSupplier);
+  bindClick("btn-add-rayon", addRayon);
+  bindClick("btn-save-edit-rayon", saveEditRayon);
+  bindClick("btn-add-stock-item", addStockItem);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);
   bindClick("btn-add-vrac", addVrac);
@@ -177,6 +191,7 @@ function bindAll() {
   bindVracEvents();
   bindSupplierEvents();
   bindReserveEvents();
+  bindStockEvents();
   bindAdminEvents();
 }
 

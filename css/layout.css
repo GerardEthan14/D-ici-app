@@ -162,12 +162,13 @@
   cursor: pointer;
   color: rgba(255, 255, 255, 0.3);
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.56rem;
+  font-size: 0.5rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: color 0.2s;
-  padding: 8px 2px;
+  padding: 8px 1px;
   position: relative;
 }
 .nav-btn.active { color: var(--xp); }

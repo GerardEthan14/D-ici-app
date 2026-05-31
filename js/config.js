@@ -21,6 +21,8 @@ export const XP_MAP = {
   dlc_ok: 10,
   supplier_add: 5,
   reserve_add: 5,
+  stock_check: 5,
+  stock_rayon_done: 30,
   streak_bonus: 20,
   team_validate: 15,
   team_validated_by_other: 20,

@@ -210,6 +210,16 @@
       <div class="card" id="reserve-list"></div>
     </section>
 
+    <!-- STOCK -->
+    <section class="panel" id="panel-stock">
+      <div class="sub-tabs">
+        <button class="sub-tab active" id="stab-week">📋 Cette semaine</button>
+        <button class="sub-tab" id="stab-rayons">🗂️ Rayons</button>
+      </div>
+      <div id="stock-week-view"></div>
+      <div id="stock-rayons-view" class="hidden"></div>
+    </section>
+
     <!-- PROFIL -->
     <section class="panel" id="panel-profil">
       <div class="rpg-card">
@@ -280,6 +290,10 @@
     <button class="nav-btn" id="nav-reserve">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Réserve
+    </button>
+    <button class="nav-btn" id="nav-stock">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Stock
     </button>
     <button class="nav-btn" id="nav-profil">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -371,6 +385,38 @@
     <div class="field"><label>Franco de port</label><input type="text" id="edit-sup-franco" autocomplete="off"></div>
     <div class="field"><label>Notes</label><textarea id="edit-sup-notes"></textarea></div>
     <button class="btn btn-primary btn-full" id="btn-save-edit-sup">Enregistrer les modifications</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-rayon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗂️ Nouveau rayon</div>
+    <div class="field"><label>Nom du rayon</label><input type="text" id="ray-name" placeholder="ex : Crèmerie, Boissons, Épicerie…" autocomplete="off"></div>
+    <button class="btn btn-primary btn-full" id="btn-add-rayon">Créer le rayon</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-edit-rayon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Modifier le rayon</div>
+    <input type="hidden" id="edit-ray-id">
+    <div class="field"><label>Nom du rayon</label><input type="text" id="edit-ray-name" autocomplete="off"></div>
+    <button class="btn btn-primary btn-full" id="btn-save-edit-rayon">Enregistrer</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-stock-item">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📦 Produit à vérifier</div>
+    <div class="field"><label>Rayon</label>
+      <select id="si-rayon" class="input-field"></select>
+    </div>
+    <div class="field"><label>Nom du produit</label><input type="text" id="si-name" placeholder="ex : Yaourt nature 1kg" autocomplete="off"></div>
+    <div class="field"><label>Code-barres (optionnel)</label><input type="text" id="si-barcode" placeholder="ex : 3256221234567" autocomplete="off" inputmode="numeric"></div>
+    <button class="btn btn-primary btn-full" id="btn-add-stock-item">Ajouter au rayon</button>
   </div>
 </div>
 
