@@ -321,6 +321,19 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-scanner">
+  <div class="modal scanner-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📷 Scanner un code-barres</div>
+    <div class="scanner-viewport">
+      <video id="scanner-video" playsinline muted></video>
+      <div class="scanner-reticle"></div>
+    </div>
+    <div class="scanner-status" id="scanner-status">Initialisation de la caméra…</div>
+    <button class="btn btn-ghost btn-full" id="btn-scanner-cancel">Annuler</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-dlc">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -331,6 +344,10 @@
         <div class="dlc-suggestions" id="dlc-prod-suggestions"></div>
       </div>
     </div>
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="dlc-prod">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      Scanner un code-barres
+    </button>
     <div class="field"><label>Fournisseur</label>
       <div class="combo-wrap">
         <input type="text" id="dlc-sup" placeholder="Taper pour chercher ou créer…" autocomplete="off">
@@ -416,6 +433,10 @@
     </div>
     <div class="field"><label>Nom du produit</label><input type="text" id="si-name" placeholder="ex : Yaourt nature 1kg" autocomplete="off"></div>
     <div class="field"><label>Code-barres (optionnel)</label><input type="text" id="si-barcode" placeholder="ex : 3256221234567" autocomplete="off" inputmode="numeric"></div>
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="si-name" data-target-barcode="si-barcode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      Scanner un code-barres
+    </button>
     <button class="btn btn-primary btn-full" id="btn-add-stock-item">Ajouter au rayon</button>
   </div>
 </div>
@@ -430,6 +451,10 @@
         <div class="dlc-suggestions" id="rv-prod-suggestions"></div>
       </div>
     </div>
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="rv-prod">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      Scanner un code-barres
+    </button>
     <div class="field"><label>Emplacement</label>
       <div class="combo-wrap">
         <input type="text" id="rv-loc" placeholder="ex : Rack A, Chambre Froide, Sol B2" autocomplete="off">

@@ -69,6 +69,7 @@ import {
   addStockItem,
   bindStockEvents,
 } from "./stock.js";
+import { bindScanButtons } from "./scanner.js";
 import { switchPanel, fabContextualOpen } from "./nav.js";
 
 /* ── Event bindings ─────────────────────────────────── */
@@ -192,6 +193,7 @@ function bindAll() {
   bindSupplierEvents();
   bindReserveEvents();
   bindStockEvents();
+  bindScanButtons();
   bindAdminEvents();
 }
 
