@@ -36,6 +36,8 @@ export function renderTodo() {
   $("td-total").textContent = total;
   $("td-bar").style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
 
+  updateTeamNavBadge();
+
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><p>${todoFilter === "done" ? "Aucune mission complétée." : "🎉 Aucune mission en cours !"}</p></div>`;
     return;
@@ -239,7 +241,10 @@ export function updateTeamBadge() {
 export function updateTeamNavBadge() {
   const el = $("team-nav-badge");
   if (!el) return;
-  const count = SHARED.teamTodos.filter((t) => t.status !== "done").length;
+  // Missions restantes = perso (non faites) + équipe (non validées)
+  const personalPending = LOCAL.todos.filter((t) => !t.done).length;
+  const teamPending = SHARED.teamTodos.filter((t) => t.status !== "done").length;
+  const count = personalPending + teamPending;
   if (count > 0) {
     el.style.display = "flex";
     el.textContent = count;

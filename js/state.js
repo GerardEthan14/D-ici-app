@@ -7,7 +7,6 @@ const DEFAULT_RPG = {
   todoHighDone: 0,
   dlcTreated: 0,
   dlcUrgent: 0,
-  ordersRcv: 0,
   supAdded: 0,
   teamDone: 0,
   teamCreated: 0,
@@ -25,7 +24,6 @@ export const LOCAL = {
 
 export const SHARED = {
   dlc: [],
-  orders: [],
   suppliers: [],
   reserve: [],
   teamTodos: [],

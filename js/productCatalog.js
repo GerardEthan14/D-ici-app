@@ -5,7 +5,6 @@ import { dlcStatus } from "./dlc.js";
 
 const SUPPLIER_FIELD_MAP = {
   "dlc-prod": "dlc-sup",
-  "ord-prod": "ord-sup",
   "rv-prod": null,
   "vrac-name": "vrac-sup",
 };
@@ -35,7 +34,7 @@ export function showProductSuggestions(inputId, dropId, context) {
   const catalog = {};
   const ensure = (key, base) => {
     if (!catalog[key]) {
-      catalog[key] = { name: base.name, supplier: base.supplier || "", dlcDates: [], orderQtys: [] };
+      catalog[key] = { name: base.name, supplier: base.supplier || "", dlcDates: [] };
     }
     return catalog[key];
   };
@@ -52,13 +51,6 @@ export function showProductSuggestions(inputId, dropId, context) {
     const entry = ensure(key, d);
     if (d.supplier && !entry.supplier) entry.supplier = d.supplier;
     entry.dlcDates.push({ date: d.date, status: dlcStatus(d.date) });
-  });
-  SHARED.orders.forEach((o) => {
-    const key = (o.name || "").toLowerCase();
-    if (!key.includes(q)) return;
-    const entry = ensure(key, o);
-    if (o.supplier && !entry.supplier) entry.supplier = o.supplier;
-    entry.orderQtys.push({ qty: o.qty, status: o.status });
   });
   SHARED.reserve.forEach((r) => {
     const key = (r.name || "").toLowerCase();
@@ -78,11 +70,6 @@ export function showProductSuggestions(inputId, dropId, context) {
     if (context === "dlc" && p.dlcDates.length) {
       extra = " — " + p.dlcDates
         .map((d) => `<span class="dlc-sug-date">${fmtD(d.date)} (${d.status.label})</span>`)
-        .join(", ");
-    } else if (context === "order" && p.orderQtys.length) {
-      const statusLabels = { todo: "à commander", waiting: "en attente" };
-      extra = " — " + p.orderQtys
-        .map((o) => `<span class="dlc-sug-date">${esc(o.qty || "?")} (${statusLabels[o.status] || o.status})</span>`)
         .join(", ");
     }
     html += `<div class="dlc-sug-item" data-name="${esc(p.name)}" data-supplier="${esc(p.supplier)}" style="cursor:pointer">

@@ -31,17 +31,11 @@ import {
 } from "./dlc.js";
 import { renderVrac, addVrac, saveEditVrac, bindVracEvents } from "./vrac.js";
 import {
-  switchCmdTab,
-  switchKanban,
-  renderKanban,
-  bindKanbanEvents,
-  addOrder,
-  saveEditOrder,
   renderSuppliers,
   bindSupplierEvents,
   addSupplier,
   saveEditSupplier,
-} from "./commandes.js";
+} from "./fournisseurs.js";
 import {
   renderReserve,
   bindReserveEvents,
@@ -89,7 +83,7 @@ function bindComboInputs(pairs, handler) {
 
 function bindAll() {
   // Nav
-  ["todo", "dlc", "commandes", "reserve", "profil"].forEach((p) =>
+  ["todo", "dlc", "fournisseurs", "reserve", "profil"].forEach((p) =>
     bindClick("nav-" + p, () => switchPanel(p))
   );
 
@@ -104,12 +98,6 @@ function bindAll() {
   bindClick("dvt-list", () => switchDlcView("list"));
   bindClick("dvt-schema", () => switchDlcView("schema"));
   bindClick("dvt-vrac", () => switchDlcView("vrac"));
-
-  // Cmd / Kanban tabs
-  bindClick("tab-orders", () => switchCmdTab("orders"));
-  bindClick("tab-suppliers", () => switchCmdTab("suppliers"));
-  bindClick("kt-todo", () => switchKanban("todo"));
-  bindClick("kt-waiting", () => switchKanban("waiting"));
 
   // Admin tabs
   bindClick("admin-tab-players", () => switchAdminTab("players"));
@@ -132,7 +120,6 @@ function bindAll() {
   // Action buttons
   bindClick("btn-add-todo", addTodo);
   bindClick("btn-add-dlc", addDlc);
-  bindClick("btn-add-order", addOrder);
   bindClick("btn-add-supplier", addSupplier);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);
@@ -140,7 +127,6 @@ function bindAll() {
   bindClick("btn-quick-create-sup", quickCreateSupplier);
   bindClick("btn-save-edit-sup", saveEditSupplier);
   bindClick("btn-save-edit-dlc", saveEditDlc);
-  bindClick("btn-save-edit-order", saveEditOrder);
   bindClick("btn-save-edit-reserve", saveEditReserve);
   bindClick("btn-save-edit-vrac", saveEditVrac);
   bindClick("btn-google-login", loginWithGoogle);
@@ -160,11 +146,9 @@ function bindAll() {
   bindComboInputs(
     [
       "dlc-sup/drop-dlc",
-      "ord-sup/drop-ord",
       "edit-dlc-sup/drop-edit-dlc",
       "vrac-sup/drop-vrac-sup",
       "edit-vrac-sup/drop-edit-vrac-sup",
-      "edit-ord-sup/drop-edit-ord",
     ],
     showSupplierCombo
   );
@@ -183,7 +167,6 @@ function bindAll() {
 
   // Product suggestions
   bindProductSuggestions("dlc-prod", "dlc-prod-suggestions", "dlc");
-  bindProductSuggestions("ord-prod", "ord-prod-suggestions", "order");
   bindProductSuggestions("rv-prod", "rv-prod-suggestions", "reserve");
   bindProductSuggestions("vrac-name", "vrac-name-suggestions", "dlc");
 
@@ -192,7 +175,6 @@ function bindAll() {
   bindTeamTodoEvents();
   bindDlcEvents();
   bindVracEvents();
-  bindKanbanEvents();
   bindSupplierEvents();
   bindReserveEvents();
   bindAdminEvents();
