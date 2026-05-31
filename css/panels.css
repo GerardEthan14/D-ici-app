@@ -797,3 +797,56 @@
 .admin-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
 .admin-detail { font-size: 0.72rem; color: var(--ink3); margin-top: 1px; }
 .admin-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+/* ── DLC focus card (à traiter ≤ 7 jours) ───────────── */
+#dlc-focus:empty { display: none; }
+.dlc-focus-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+.dlc-focus-card.alert {
+  background: var(--red-light);
+  border: 1px solid rgba(193, 18, 31, 0.25);
+}
+.dlc-focus-card.ok {
+  background: var(--green-light);
+  border: 1px solid rgba(45, 106, 79, 0.2);
+}
+.dlc-focus-icon { font-size: 1.6rem; line-height: 1; }
+.dlc-focus-body { flex: 1; min-width: 0; }
+.dlc-focus-count {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.dlc-focus-sub { font-size: 0.76rem; color: var(--ink3); margin-top: 1px; }
+.dlc-focus-btn {
+  flex-shrink: 0;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.dlc-focus-bell {
+  flex-shrink: 0;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 7px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+}

@@ -20,6 +20,7 @@ export const LOCAL = {
   todos: [],
   rpg: { ...DEFAULT_RPG },
   notifiedDone: [],
+  dlcAlertDate: "",
 };
 
 export const SHARED = {

@@ -43,20 +43,109 @@ export function getDlcView() {
   return dlcView;
 }
 
+/* ── Focus « à traiter ≤ 7 jours » ──────────────────── */
+
+// Produits dont la DLC est dépassée ou expire dans 7 jours ou moins.
+function getUrgentDlc() {
+  return SHARED.dlc.filter((d) => dlcStatus(d.date).days <= 7);
+}
+
+let focusMode = false;
+
+export function toggleDlcFocus() {
+  focusMode = !focusMode;
+  renderDlc();
+}
+
+export function renderDlcFocus() {
+  const el = $("dlc-focus");
+  if (!el) return;
+  const urgent = getUrgentDlc();
+  const notifSupported = typeof window !== "undefined" && "Notification" in window;
+  const showBell = notifSupported && Notification.permission === "default";
+  const bell = showBell
+    ? `<button class="dlc-focus-bell" data-action="enable-dlc-reminders" title="Activer les rappels">🔔 Rappels</button>`
+    : "";
+
+  if (!urgent.length) {
+    focusMode = false;
+    el.innerHTML = `<div class="dlc-focus-card ok">
+      <span class="dlc-focus-icon">✅</span>
+      <div class="dlc-focus-body"><div class="dlc-focus-count">Rien d'urgent</div><div class="dlc-focus-sub">Aucune DLC à traiter sous 7 jours</div></div>
+      ${bell}
+    </div>`;
+    return;
+  }
+  el.innerHTML = `<div class="dlc-focus-card alert">
+    <span class="dlc-focus-icon">🔥</span>
+    <div class="dlc-focus-body">
+      <div class="dlc-focus-count">${urgent.length} à traiter</div>
+      <div class="dlc-focus-sub">DLC ≤ 7 jours (périmés + critiques)</div>
+    </div>
+    <button class="dlc-focus-btn" data-action="toggle-dlc-focus">${focusMode ? "Tout voir" : "Voir seulement"}</button>
+    ${bell}
+  </div>`;
+}
+
+/* ── Rappels / alertes ──────────────────────────────── */
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Alerte une fois par jour s'il y a des DLC à traiter sous 7 jours.
+export function checkDlcAlerts() {
+  const urgent = getUrgentDlc();
+  if (!urgent.length) return;
+  if (LOCAL.dlcAlertDate === todayKey()) return;
+  LOCAL.dlcAlertDate = todayKey();
+  saveLocal();
+  toast(`🔔 ${urgent.length} DLC à traiter sous 7 jours !`, true);
+  fireDlcNotification(urgent.length);
+}
+
+function fireDlcNotification(count) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  try {
+    new Notification("D'ici App — DLC à traiter", {
+      body: `${count} produit(s) à vérifier sous 7 jours.`,
+    });
+  } catch {}
+}
+
+export function enableDlcReminders() {
+  if (!("Notification" in window)) {
+    toast("⚠️ Notifications non supportées sur cet appareil");
+    return;
+  }
+  Notification.requestPermission().then((perm) => {
+    if (perm === "granted") {
+      toast("🔔 Rappels activés !", true);
+      const count = getUrgentDlc().length;
+      if (count) fireDlcNotification(count);
+    } else {
+      toast("Rappels non activés");
+    }
+    renderDlcFocus();
+  });
+}
+
 /* ── List render ────────────────────────────────────── */
 
 export function renderDlc() {
+  renderDlcFocus();
   const el = $("dlc-list");
   if (!el) return;
   const searchEl = $("dlc-search");
   const q = searchEl ? searchEl.value.trim().toLowerCase() : "";
-  const list = q
+  let list = q
     ? SHARED.dlc.filter(
         (d) =>
           (d.name || "").toLowerCase().includes(q) ||
           (d.supplier || "").toLowerCase().includes(q)
       )
     : SHARED.dlc;
+  if (focusMode) list = list.filter((d) => dlcStatus(d.date).days <= 7);
 
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun résultat." : "Aucun produit enregistré."}</p></div>`;
@@ -269,6 +358,12 @@ export function bindDlcEvents() {
       openEditDlc(btn.dataset.id);
     }
   });
+  $("dlc-focus")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    if (btn.dataset.action === "toggle-dlc-focus") toggleDlcFocus();
+    else if (btn.dataset.action === "enable-dlc-reminders") enableDlcReminders();
+  });
   $("dlc-search")?.addEventListener("input", renderDlc);
 }
 
@@ -276,4 +371,5 @@ export function bindDlcEvents() {
 render.dlc = () => {
   renderDlc();
   updateDlcBadge();
+  checkDlcAlerts();
 };
