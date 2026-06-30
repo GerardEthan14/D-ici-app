@@ -213,11 +213,13 @@
     <!-- STOCK -->
     <section class="panel" id="panel-stock">
       <div class="sub-tabs">
-        <button class="sub-tab active" id="stab-week">📋 Cette semaine</button>
+        <button class="sub-tab active" id="stab-week">📋 Semaine</button>
         <button class="sub-tab" id="stab-rayons">🗂️ Rayons</button>
+        <button class="sub-tab" id="stab-inventory">📦 Inventaire</button>
       </div>
       <div id="stock-week-view"></div>
       <div id="stock-rayons-view" class="hidden"></div>
+      <div id="stock-inventory-view" class="hidden"></div>
     </section>
 
     <!-- PROFIL -->
@@ -438,6 +440,29 @@
       Scanner un code-barres
     </button>
     <button class="btn btn-primary btn-full" id="btn-add-stock-item">Ajouter au rayon</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-count">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📦 Ajouter un comptage</div>
+    <div class="field"><label>Emplacement</label>
+      <select id="ic-loc" class="input-field"></select>
+    </div>
+    <div class="field"><label>…ou nouvel emplacement</label><input type="text" id="ic-loc-free" placeholder="ex : Frigo 2, Allée B" autocomplete="off"></div>
+    <div class="field"><label>Nom du produit</label><input type="text" id="ic-name" placeholder="ex : Lait demi-écrémé 1L" autocomplete="off"></div>
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="ic-name" data-target-barcode="ic-barcode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      Scanner un code-barres
+    </button>
+    <div class="ic-qty-row">
+      <div class="field"><label>Quantité</label><input type="number" id="ic-qty" placeholder="0" inputmode="decimal" autocomplete="off"></div>
+      <div class="field"><label>Unité</label><select id="ic-unit" class="input-field"></select></div>
+    </div>
+    <div class="field"><label>Code-barres</label><input type="text" id="ic-barcode" placeholder="scanné ou généré" autocomplete="off" inputmode="numeric"></div>
+    <button type="button" class="btn btn-ghost btn-full" id="btn-gen-label">🏷️ Générer + imprimer une étiquette</button>
+    <button class="btn btn-primary btn-full" id="btn-add-count">Ajouter au comptage</button>
   </div>
 </div>
 

@@ -1,5 +1,6 @@
 import { $, toast } from "./utils.js";
 import { openModal, closeModal } from "./modals.js";
+import { findProductByBarcode, saveProductToCatalog } from "./productCatalog.js";
 
 /* ──────────────────────────────────────────────────────
    Scanner de code-barres (caméra) + recherche OpenFoodFacts.
@@ -143,10 +144,21 @@ export function bindScanButtons() {
         const bcEl = btn.dataset.targetBarcode ? $(btn.dataset.targetBarcode) : null;
         if (bcEl) bcEl.value = code;
         const nameEl = btn.dataset.targetName ? $(btn.dataset.targetName) : null;
+
+        // 1) Déjà connu dans le catalogue (scanner intelligent) ?
+        const known = findProductByBarcode(code);
+        if (known) {
+          if (nameEl) nameEl.value = known;
+          toast(`✅ ${known}`, true);
+          return;
+        }
+
+        // 2) Recherche OpenFoodFacts
         toast("🔎 Recherche du produit…");
         const name = await lookupProductName(code);
         if (name) {
           if (nameEl) nameEl.value = name;
+          saveProductToCatalog(name, "", code); // mémorise pour la prochaine fois
           toast(`✅ ${name}`, true);
         } else {
           toast(`Produit inconnu (code ${code})`);

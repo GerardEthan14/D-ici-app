@@ -9,18 +9,28 @@ const SUPPLIER_FIELD_MAP = {
   "vrac-name": "vrac-sup",
 };
 
-export function saveProductToCatalog(name, supplier) {
+export function saveProductToCatalog(name, supplier, barcode) {
   if (!name || !app.firebaseMode) return;
   const existing = SHARED.products.find(
     (p) => p.name.toLowerCase() === name.toLowerCase()
   );
   if (existing) {
-    if (supplier && !existing.supplier) {
-      fbSet(`products/${existing.id}`, { ...existing, supplier });
+    const patch = {};
+    if (supplier && !existing.supplier) patch.supplier = supplier;
+    if (barcode && !existing.barcode) patch.barcode = barcode;
+    if (Object.keys(patch).length) {
+      fbSet(`products/${existing.id}`, { ...existing, ...patch });
     }
     return;
   }
-  fbPush("products", { name, supplier: supplier || "" });
+  fbPush("products", { name, supplier: supplier || "", barcode: barcode || "" });
+}
+
+// Retrouve le nom d'un produit déjà connu à partir de son code-barres.
+export function findProductByBarcode(barcode) {
+  if (!barcode) return "";
+  const p = SHARED.products.find((x) => x.barcode && x.barcode === barcode);
+  return p ? p.name : "";
 }
 
 export function showProductSuggestions(inputId, dropId, context) {

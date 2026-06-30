@@ -46,7 +46,11 @@ function buildZoneConfig() {
 
 const ZONE_CONFIG = buildZoneConfig();
 
-function getZoneData(z) {
+export function getZoneConfig() {
+  return ZONE_CONFIG;
+}
+
+export function getZoneData(z) {
   const override = SHARED.zones[z.id];
   return {
     ...z,

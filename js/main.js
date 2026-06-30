@@ -70,6 +70,11 @@ import {
   bindStockEvents,
 } from "./stock.js";
 import { bindScanButtons } from "./scanner.js";
+import {
+  addCount,
+  generateLabel,
+  bindInventoryEvents,
+} from "./inventory.js";
 import { switchPanel, fabContextualOpen } from "./nav.js";
 
 /* ── Event bindings ─────────────────────────────────── */
@@ -98,6 +103,7 @@ function bindAll() {
   // Stock sub-tabs
   bindClick("stab-week", () => switchStockView("week"));
   bindClick("stab-rayons", () => switchStockView("rayons"));
+  bindClick("stab-inventory", () => switchStockView("inventory"));
 
   // Todo tabs / filters
   bindClick("ttab-personal", () => switchTodoTab("personal"));
@@ -136,6 +142,8 @@ function bindAll() {
   bindClick("btn-add-rayon", addRayon);
   bindClick("btn-save-edit-rayon", saveEditRayon);
   bindClick("btn-add-stock-item", addStockItem);
+  bindClick("btn-add-count", addCount);
+  bindClick("btn-gen-label", generateLabel);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);
   bindClick("btn-add-vrac", addVrac);
@@ -193,6 +201,7 @@ function bindAll() {
   bindSupplierEvents();
   bindReserveEvents();
   bindStockEvents();
+  bindInventoryEvents();
   bindScanButtons();
   bindAdminEvents();
 }

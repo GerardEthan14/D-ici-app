@@ -55,9 +55,12 @@ export function switchStockView(v) {
   stockView = v;
   $("stock-week-view").classList.toggle("hidden", v !== "week");
   $("stock-rayons-view").classList.toggle("hidden", v !== "rayons");
+  $("stock-inventory-view").classList.toggle("hidden", v !== "inventory");
   $("stab-week").classList.toggle("active", v === "week");
   $("stab-rayons").classList.toggle("active", v === "rayons");
-  renderStock();
+  $("stab-inventory").classList.toggle("active", v === "inventory");
+  if (v === "inventory") render.inventory?.();
+  else renderStock();
 }
 
 /* ── Vue « Cette semaine » ──────────────────────────── */

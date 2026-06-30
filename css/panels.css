@@ -985,3 +985,87 @@
 }
 .btn-sm { padding: 7px 12px; font-size: 0.8rem; }
 .rayon-card .btn-sm { margin-top: 10px; }
+
+/* =========================================================
+   INVENTAIRE (sous-onglet du module Stock)
+   ========================================================= */
+.zone-rect.inv-counted { fill: var(--green-light); stroke: var(--green); }
+.inv-map-card { margin-bottom: 12px; }
+
+.inv-start-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 20px;
+  text-align: center;
+}
+.inv-start-icon { font-size: 2.4rem; }
+.inv-start-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin: 8px 0 6px;
+}
+.inv-start-sub { font-size: 0.84rem; color: var(--ink3); line-height: 1.5; margin-bottom: 16px; }
+
+.inv-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--dark-bg);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.inv-banner-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; }
+.inv-banner-sub { font-size: 0.74rem; opacity: 0.7; margin-top: 2px; }
+.inv-banner-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
+.inv-banner-stats strong { font-family: 'Syne', sans-serif; font-size: 1.3rem; display: block; color: var(--xp); }
+.inv-banner-stats span { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; }
+
+.inv-loc-group { margin-top: 14px; }
+.inv-loc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+.inv-loc-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+.inv-loc-count { font-size: 0.74rem; color: var(--ink3); }
+.inv-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--bg2);
+}
+.inv-row:last-child { border-bottom: none; }
+.inv-row-body { flex: 1; min-width: 0; }
+.inv-row-name { font-weight: 600; font-size: 0.92rem; color: var(--ink); }
+.inv-row-meta { font-size: 0.72rem; color: var(--ink3); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+.inv-row-qty {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.ic-qty-row { display: flex; gap: 10px; }
+.ic-qty-row .field { flex: 1; }
+.inv-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.inv-actions .btn { flex: 1; }
+.btn-danger-ghost {
+  background: var(--red-light);
+  color: var(--red);
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}

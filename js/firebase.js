@@ -127,7 +127,7 @@ export async function fbUpdateOrLocal(collection, id, data) {
 
 /* ── Subscriptions ──────────────────────────────────── */
 
-const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac", "rayons", "stockItems"];
+const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac", "rayons", "stockItems", "invCounts"];
 
 function unsubscribeAll() {
   _unsubscribers.forEach((unsub) => unsub());
@@ -137,6 +137,8 @@ function unsubscribeAll() {
   SHARED.teamTodos = [];
   SHARED.scores = {};
   SHARED.zones = {};
+  SHARED.invZones = {};
+  SHARED.invMeta = {};
 }
 
 function subscribeAll() {
@@ -194,6 +196,18 @@ function subscribeAll() {
     render.zones?.();
   });
   _unsubscribers.push(unsubZones);
+
+  const unsubInvZones = onValue(ref(app.db, sp("invZones")), (snap) => {
+    SHARED.invZones = snap.val() || {};
+    render.inventory?.();
+  });
+  _unsubscribers.push(unsubInvZones);
+
+  const unsubInvMeta = onValue(ref(app.db, sp("invMeta")), (snap) => {
+    SHARED.invMeta = snap.val() || {};
+    render.inventory?.();
+  });
+  _unsubscribers.push(unsubInvMeta);
 
   onValue(
     ref(app.db, sp("renames/" + app.username)),
