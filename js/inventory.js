@@ -287,28 +287,91 @@ export function exportCsv() {
   toast("⬇️ Export CSV généré");
 }
 
-export function printInventory() {
+function barcodeFormat(code) {
+  if (/^\d{13}$/.test(code)) return "EAN13";
+  if (/^\d{12}$/.test(code)) return "UPC";
+  if (/^\d{8}$/.test(code)) return "EAN8";
+  return "CODE128";
+}
+
+// Rend un code-barres scannable en image (dataURL). Repli CODE128 si invalide.
+function makeBarcodeDataUrl(JsBarcode, code) {
+  const draw = (fmt) => {
+    const canvas = document.createElement("canvas");
+    JsBarcode(canvas, code, {
+      format: fmt,
+      displayValue: true,
+      width: 2,
+      height: 45,
+      margin: 6,
+      fontSize: 14,
+    });
+    return canvas.toDataURL("image/png");
+  };
+  try {
+    return draw(barcodeFormat(code));
+  } catch {
+    try {
+      return draw("CODE128");
+    } catch {
+      return null;
+    }
+  }
+}
+
+export async function printInventory() {
+  let JsBarcode = null;
+  try {
+    const mod = await import("https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/+esm");
+    JsBarcode = mod.default || mod;
+  } catch {
+    toast("⚠️ Codes-barres indisponibles, impression en texte");
+  }
+
   const groups = {};
   SHARED.invCounts.forEach((c) => {
     const loc = c.location || "Sans emplacement";
     (groups[loc] ||= []).push(c);
   });
   const locs = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
   let body = `<h1>Inventaire — ${new Date().toLocaleDateString("fr-FR")}</h1>`;
   locs.forEach((loc) => {
-    body += `<h2>${esc(loc)}</h2><table><thead><tr><th>Produit</th><th>Quantité</th><th>Unité</th><th>Code-barres</th></tr></thead><tbody>`;
+    body += `<h2>${esc(loc)}</h2>`;
     groups[loc].forEach((c) => {
-      body += `<tr><td>${esc(c.name)}</td><td>${esc(c.qty)}</td><td>${esc(c.unit || "")}</td><td>${esc(c.barcode || "")}</td></tr>`;
+      const img = c.barcode && JsBarcode ? makeBarcodeDataUrl(JsBarcode, c.barcode) : null;
+      body += `<div class="item">
+        <div class="item-info">
+          <div class="item-name">${esc(c.name)}</div>
+          <div class="item-qty">Qté&nbsp;: <strong>${esc(c.qty)} ${esc(c.unit || "")}</strong></div>
+        </div>
+        <div class="item-bc">${
+          img
+            ? `<img src="${img}" alt="${esc(c.barcode)}"/>`
+            : `<span class="nobc">${c.barcode ? esc(c.barcode) : "pas de code-barres"}</span>`
+        }</div>
+      </div>`;
     });
-    body += `</tbody></table>`;
   });
+
   const w = window.open("", "_blank");
   if (!w) {
     toast("⚠️ Autorise les pop-ups pour imprimer");
     return;
   }
   w.document.write(`<html><head><title>Inventaire</title>
-    <style>body{font-family:sans-serif;padding:20px}h1{font-size:20px}h2{font-size:15px;margin-top:18px;border-bottom:1px solid #ccc}table{width:100%;border-collapse:collapse;margin-top:6px}th,td{border:1px solid #ddd;padding:5px 8px;text-align:left;font-size:13px}th{background:#f3f3f3}</style>
+    <style>
+      body{font-family:sans-serif;padding:18px;margin:0}
+      h1{font-size:20px;margin:0 0 12px}
+      h2{font-size:15px;margin:18px 0 4px;border-bottom:1px solid #ccc;padding-bottom:3px}
+      .item{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #eee;padding:8px 4px;page-break-inside:avoid}
+      .item-info{flex:1;min-width:0}
+      .item-name{font-weight:600;font-size:14px}
+      .item-qty{font-size:12px;color:#444;margin-top:2px}
+      .item-bc{flex-shrink:0;text-align:center}
+      .item-bc img{height:50px}
+      .nobc{font-size:11px;color:#999}
+    </style>
     </head><body onload="window.print()">${body}</body></html>`);
   w.document.close();
 }
