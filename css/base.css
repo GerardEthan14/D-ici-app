@@ -1,0 +1,51 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ── Role-based UI: student = lecture seule sur les modules stock ── */
+
+/* FAB global (utilisé pour ajouter DLC/commandes/réserve) */
+body.role-student #fab-add { display: none !important; }
+
+/* Bouton "Nouvelle mission d'équipe" */
+body.role-student [data-open-modal="modal-add-team-todo"] { display: none !important; }
+
+/* Action buttons dans les listes stock (edit, delete, validate, advance) */
+body.role-student #dlc-list .icon-btn,
+body.role-student #dlc-list .dlc-check,
+body.role-student #dlc-schema-content .icon-btn,
+body.role-student #dlc-schema-content .dlc-check,
+body.role-student #vrac-list .icon-btn,
+body.role-student #kanban-list .icon-btn,
+body.role-student #suppliers-list .icon-btn,
+body.role-student #reserve-list .icon-btn:not([data-action="pulse-zone"]) {
+  display: none !important;
+}
+
+/* Boutons d'édition de zones réserve */
+body.role-student #btn-save-zone,
+body.role-student #btn-reset-zone {
+  display: none !important;
+}
+
+/* Boutons inline dans les cards fournisseurs */
+body.role-student .sup-card .icon-btn { display: none !important; }
