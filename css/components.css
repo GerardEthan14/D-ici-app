@@ -436,6 +436,9 @@ textarea { resize: vertical; min-height: 70px; }
 }
 
 /* ── Scanner code-barres ────────────────────────────── */
+/* Le scanner s'ouvre par-dessus une autre modale (le bouton scan y est
+   intégré) : il doit donc passer au-dessus de toutes les autres modales. */
+#modal-scanner { z-index: 800; }
 .scan-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
 .scanner-viewport {
   position: relative;
