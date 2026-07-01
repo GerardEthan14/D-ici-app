@@ -9,6 +9,11 @@ const SUPPLIER_FIELD_MAP = {
   "vrac-name": "vrac-sup",
 };
 
+// Champs code-barres à remplir automatiquement quand on choisit un produit.
+const BARCODE_FIELD_MAP = {
+  "si-name": "si-barcode",
+};
+
 export function saveProductToCatalog(name, supplier, barcode) {
   if (!name || !app.firebaseMode) return;
   const existing = SHARED.products.find(
@@ -44,7 +49,7 @@ export function showProductSuggestions(inputId, dropId, context) {
   const catalog = {};
   const ensure = (key, base) => {
     if (!catalog[key]) {
-      catalog[key] = { name: base.name, supplier: base.supplier || "", dlcDates: [] };
+      catalog[key] = { name: base.name, supplier: base.supplier || "", barcode: base.barcode || "", dlcDates: [] };
     }
     return catalog[key];
   };
@@ -54,6 +59,7 @@ export function showProductSuggestions(inputId, dropId, context) {
     if (!key.includes(q)) return;
     const entry = ensure(key, p);
     if (p.supplier && !entry.supplier) entry.supplier = p.supplier;
+    if (p.barcode && !entry.barcode) entry.barcode = p.barcode;
   });
   SHARED.dlc.forEach((d) => {
     const key = (d.name || "").toLowerCase();
@@ -82,8 +88,8 @@ export function showProductSuggestions(inputId, dropId, context) {
         .map((d) => `<span class="dlc-sug-date">${fmtD(d.date)} (${d.status.label})</span>`)
         .join(", ");
     }
-    html += `<div class="dlc-sug-item" data-name="${esc(p.name)}" data-supplier="${esc(p.supplier)}" style="cursor:pointer">
-      <span class="dlc-sug-name">${esc(p.name)}</span>${p.supplier ? ` · <span style="color:var(--ink3)">🏭 ${esc(p.supplier)}</span>` : ""}${extra}
+    html += `<div class="dlc-sug-item" data-name="${esc(p.name)}" data-supplier="${esc(p.supplier)}" data-barcode="${esc(p.barcode || "")}" style="cursor:pointer">
+      <span class="dlc-sug-name">${esc(p.name)}</span>${p.supplier ? ` · <span style="color:var(--ink3)">🏭 ${esc(p.supplier)}</span>` : ""}${p.barcode ? ` · <span style="color:var(--ink3)">🔖 ${esc(p.barcode)}</span>` : ""}${extra}
     </div>`;
   });
   drop.innerHTML = html;
@@ -95,6 +101,8 @@ export function showProductSuggestions(inputId, dropId, context) {
     $(inputId).value = item.dataset.name;
     const supField = SUPPLIER_FIELD_MAP[inputId];
     if (supField && item.dataset.supplier) $(supField).value = item.dataset.supplier;
+    const bcField = BARCODE_FIELD_MAP[inputId];
+    if (bcField && item.dataset.barcode && $(bcField)) $(bcField).value = item.dataset.barcode;
     drop.style.display = "none";
   };
 }

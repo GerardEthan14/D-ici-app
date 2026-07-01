@@ -3,6 +3,7 @@ import { SHARED } from "./state.js";
 import { fbPushOrLocal, fbRemoveOrLocal, fbUpdateOrLocal } from "./firebase.js";
 import { gainXP } from "./rpg.js";
 import { closeModal, openModal } from "./modals.js";
+import { saveProductToCatalog } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 /* ── Semaine ISO & rotation ─────────────────────────── */
@@ -273,11 +274,13 @@ export async function addStockItem() {
     toast("⚠️ Nom requis");
     return;
   }
+  const barcode = $("si-barcode").value.trim();
   await fbPushOrLocal("stockItems", {
     name,
     rayonId,
-    barcode: $("si-barcode").value.trim(),
+    barcode,
   });
+  saveProductToCatalog(name, "", barcode);
   $("si-name").value = "";
   $("si-barcode").value = "";
   closeModal("modal-add-stock-item");

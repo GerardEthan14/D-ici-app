@@ -194,6 +194,7 @@ function bindAll() {
   bindProductSuggestions("dlc-prod", "dlc-prod-suggestions", "dlc");
   bindProductSuggestions("rv-prod", "rv-prod-suggestions", "reserve");
   bindProductSuggestions("vrac-name", "vrac-name-suggestions", "dlc");
+  bindProductSuggestions("si-name", "si-name-suggestions", "stock");
 
   // List event delegations
   bindTodoListEvents();
