@@ -466,6 +466,29 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-edit-count">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Modifier le comptage</div>
+    <input type="hidden" id="ic-e-id">
+    <div class="field"><label>Emplacement</label>
+      <select id="ic-e-loc" class="input-field"></select>
+    </div>
+    <div class="field"><label>…ou nouvel emplacement</label><input type="text" id="ic-e-loc-free" placeholder="ex : Frigo 2, Allée B" autocomplete="off"></div>
+    <div class="field"><label>Nom du produit</label><input type="text" id="ic-e-name" autocomplete="off"></div>
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="ic-e-name" data-target-barcode="ic-e-barcode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      Scanner un code-barres
+    </button>
+    <div class="ic-qty-row">
+      <div class="field"><label>Quantité</label><input type="number" id="ic-e-qty" inputmode="decimal" autocomplete="off"></div>
+      <div class="field"><label>Unité</label><select id="ic-e-unit" class="input-field"></select></div>
+    </div>
+    <div class="field"><label>Code-barres</label><input type="text" id="ic-e-barcode" autocomplete="off" inputmode="numeric"></div>
+    <button class="btn btn-primary btn-full" id="btn-save-edit-count">Enregistrer</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-reserve">
   <div class="modal">
     <div class="modal-handle"></div>
