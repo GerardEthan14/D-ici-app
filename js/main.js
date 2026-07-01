@@ -72,6 +72,7 @@ import {
 import { bindScanButtons } from "./scanner.js";
 import {
   addCount,
+  saveEditCount,
   generateLabel,
   bindInventoryEvents,
 } from "./inventory.js";
@@ -143,6 +144,7 @@ function bindAll() {
   bindClick("btn-save-edit-rayon", saveEditRayon);
   bindClick("btn-add-stock-item", addStockItem);
   bindClick("btn-add-count", addCount);
+  bindClick("btn-save-edit-count", saveEditCount);
   bindClick("btn-gen-label", generateLabel);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);

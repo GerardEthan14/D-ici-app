@@ -3,6 +3,7 @@ import { SHARED, app } from "./state.js";
 import {
   fbPushOrLocal,
   fbRemoveOrLocal,
+  fbUpdateOrLocal,
   fbSet,
   fbRemove,
   sp,
@@ -153,6 +154,7 @@ export function renderInventory() {
               <div class="inv-row-meta">${c.barcode ? `🔖 ${esc(c.barcode)}` : ""}${c._by ? `<span>par ${esc(c._by)}</span>` : ""}</div>
             </div>
             <div class="inv-row-qty">${esc(c.qty)} ${esc(c.unit || "")}</div>
+            <button class="icon-btn icon-edit icon-sm" data-action="inv-edit" data-id="${esc(c.id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             <button class="icon-btn danger icon-sm" data-action="inv-del" data-id="${esc(c.id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
           </div>`
           )
@@ -215,6 +217,62 @@ export async function addCount() {
   if (barcode) saveProductToCatalog(name, "", barcode);
   closeModal("modal-add-count");
   toast("✅ Comptage ajouté");
+}
+
+/* ── Modification d'un comptage ─────────────────────── */
+
+export function openEditCount(id) {
+  const c = SHARED.invCounts.find((x) => x.id === id);
+  if (!c) return;
+  const labels = [...new Set(zoneLabels())];
+  const locSel = $("ic-e-loc");
+  if (locSel) {
+    locSel.innerHTML = ['<option value="">— Choisir / taper —</option>']
+      .concat(labels.map((l) => `<option value="${esc(l)}">${esc(l)}</option>`))
+      .join("");
+  }
+  const unitSel = $("ic-e-unit");
+  if (unitSel) unitSel.innerHTML = UNITS.map((u) => `<option value="${esc(u)}">${esc(u)}</option>`).join("");
+  $("ic-e-id").value = id;
+  // Emplacement : dans la liste si connu, sinon dans le champ libre
+  const known = labels.some((l) => l === c.location);
+  $("ic-e-loc").value = known ? c.location : "";
+  $("ic-e-loc-free").value = known ? "" : (c.location || "");
+  $("ic-e-name").value = c.name || "";
+  $("ic-e-qty").value = c.qty || "";
+  $("ic-e-unit").value = c.unit || UNITS[0];
+  $("ic-e-barcode").value = c.barcode || "";
+  openModal("modal-edit-count");
+}
+
+export async function saveEditCount() {
+  const id = $("ic-e-id").value;
+  const c = SHARED.invCounts.find((x) => x.id === id);
+  if (!c) return;
+  const name = $("ic-e-name").value.trim();
+  const qty = $("ic-e-qty").value.trim();
+  if (!name) {
+    toast("⚠️ Nom requis");
+    return;
+  }
+  if (!qty) {
+    toast("⚠️ Quantité requise");
+    return;
+  }
+  const free = $("ic-e-loc-free").value.trim();
+  const location = free || $("ic-e-loc").value;
+  const barcode = $("ic-e-barcode").value.trim();
+  await fbUpdateOrLocal("invCounts", id, {
+    ...c,
+    name,
+    qty,
+    unit: $("ic-e-unit").value,
+    barcode,
+    location: location || "Sans emplacement",
+  });
+  if (barcode) saveProductToCatalog(name, "", barcode);
+  closeModal("modal-edit-count");
+  toast("✅ Comptage modifié");
 }
 
 async function deleteCount(id) {
@@ -385,6 +443,7 @@ export function bindInventoryEvents() {
     switch (btn.dataset.action) {
       case "inv-start": startInventory(); break;
       case "inv-add": openAddCount(); break;
+      case "inv-edit": openEditCount(btn.dataset.id); break;
       case "inv-del": deleteCount(btn.dataset.id); break;
       case "inv-csv": exportCsv(); break;
       case "inv-print": printInventory(); break;
