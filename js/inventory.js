@@ -88,6 +88,24 @@ function zoneLabels() {
   return getZoneConfig().map((z) => getZoneData(z).label);
 }
 
+// Emplacements proposés : zones + emplacements déjà utilisés dans l'inventaire.
+function allLocations() {
+  return [...new Set([...zoneLabels(), ...SHARED.invCounts.map((c) => c.location).filter(Boolean)])];
+}
+
+function fillLocDatalist() {
+  const dl = $("inv-loc-list");
+  if (dl) dl.innerHTML = allLocations().map((l) => `<option value="${esc(l)}"></option>`).join("");
+}
+
+// Enregistre (rétroactivement) tous les produits de l'inventaire au catalogue
+// pour pouvoir les réutiliser (rayons, DLC, réserve…). Idempotent.
+function syncInvToCatalog() {
+  SHARED.invCounts.forEach((c) => {
+    if (c.name) saveProductToCatalog(c.name, "", c.barcode || "");
+  });
+}
+
 /* ── Rendu principal ────────────────────────────────── */
 
 export function renderInventory() {
@@ -108,6 +126,9 @@ export function renderInventory() {
   const counts = SHARED.invCounts;
   const counted = countedZoneIds();
   const started = meta.startedAt ? new Date(meta.startedAt).toLocaleDateString("fr-FR") : "";
+
+  // Assure que les produits comptés sont bien dans le catalogue (réutilisables).
+  syncInvToCatalog();
 
   // Regroupe les lignes par emplacement
   const groups = {};
@@ -177,27 +198,20 @@ export function renderInventory() {
 /* ── Ajout d'un comptage ────────────────────────────── */
 
 export function openAddCount(prefLoc) {
-  const locSel = $("ic-loc");
-  if (locSel) {
-    const opts = ['<option value="">— Choisir / taper —</option>']
-      .concat([...new Set(zoneLabels())].map((l) => `<option value="${esc(l)}">${esc(l)}</option>`));
-    locSel.innerHTML = opts.join("");
-    if (prefLoc) locSel.value = prefLoc;
-  }
+  fillLocDatalist();
+  $("ic-loc").value = prefLoc || "";
   const unitSel = $("ic-unit");
   if (unitSel) unitSel.innerHTML = UNITS.map((u) => `<option value="${esc(u)}">${esc(u)}</option>`).join("");
   $("ic-name").value = "";
   $("ic-qty").value = "";
   $("ic-barcode").value = "";
-  $("ic-loc-free").value = "";
   openModal("modal-add-count");
 }
 
 export async function addCount() {
   const name = $("ic-name").value.trim();
   const qty = $("ic-qty").value.trim();
-  const free = $("ic-loc-free").value.trim();
-  const location = free || $("ic-loc").value;
+  const location = $("ic-loc").value.trim();
   if (!name) {
     toast("⚠️ Nom requis");
     return;
@@ -214,7 +228,7 @@ export async function addCount() {
     barcode,
     location: location || "Sans emplacement",
   });
-  if (barcode) saveProductToCatalog(name, "", barcode);
+  saveProductToCatalog(name, "", barcode);
   closeModal("modal-add-count");
   toast("✅ Comptage ajouté");
 }
@@ -224,20 +238,11 @@ export async function addCount() {
 export function openEditCount(id) {
   const c = SHARED.invCounts.find((x) => x.id === id);
   if (!c) return;
-  const labels = [...new Set(zoneLabels())];
-  const locSel = $("ic-e-loc");
-  if (locSel) {
-    locSel.innerHTML = ['<option value="">— Choisir / taper —</option>']
-      .concat(labels.map((l) => `<option value="${esc(l)}">${esc(l)}</option>`))
-      .join("");
-  }
+  fillLocDatalist();
   const unitSel = $("ic-e-unit");
   if (unitSel) unitSel.innerHTML = UNITS.map((u) => `<option value="${esc(u)}">${esc(u)}</option>`).join("");
   $("ic-e-id").value = id;
-  // Emplacement : dans la liste si connu, sinon dans le champ libre
-  const known = labels.some((l) => l === c.location);
-  $("ic-e-loc").value = known ? c.location : "";
-  $("ic-e-loc-free").value = known ? "" : (c.location || "");
+  $("ic-e-loc").value = c.location || "";
   $("ic-e-name").value = c.name || "";
   $("ic-e-qty").value = c.qty || "";
   $("ic-e-unit").value = c.unit || UNITS[0];
@@ -259,8 +264,7 @@ export async function saveEditCount() {
     toast("⚠️ Quantité requise");
     return;
   }
-  const free = $("ic-e-loc-free").value.trim();
-  const location = free || $("ic-e-loc").value;
+  const location = $("ic-e-loc").value.trim();
   const barcode = $("ic-e-barcode").value.trim();
   await fbUpdateOrLocal("invCounts", id, {
     ...c,
@@ -270,7 +274,7 @@ export async function saveEditCount() {
     barcode,
     location: location || "Sans emplacement",
   });
-  if (barcode) saveProductToCatalog(name, "", barcode);
+  saveProductToCatalog(name, "", barcode);
   closeModal("modal-edit-count");
   toast("✅ Comptage modifié");
 }
@@ -377,7 +381,52 @@ function makeBarcodeDataUrl(JsBarcode, code) {
   }
 }
 
-export async function printInventory() {
+// Ouvre le dialogue de choix des emplacements à imprimer.
+export function openPrintDialog() {
+  const groups = {};
+  SHARED.invCounts.forEach((c) => {
+    const loc = c.location || "Sans emplacement";
+    (groups[loc] ||= []).push(c);
+  });
+  const locs = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  const el = $("print-loc-list");
+  if (!el) return;
+  if (!locs.length) {
+    el.innerHTML = `<div class="empty-state"><p>Aucun comptage à imprimer.</p></div>`;
+  } else {
+    el.innerHTML = locs
+      .map(
+        (l) => `<label class="print-loc-row">
+          <input type="checkbox" class="print-loc-cb" value="${esc(l)}" checked>
+          <span>📍 ${esc(l)}</span>
+          <span class="print-loc-n">${groups[l].length}</span>
+        </label>`
+      )
+      .join("");
+  }
+  const all = $("print-all");
+  if (all) all.checked = true;
+  openModal("modal-print-inv");
+}
+
+export function togglePrintAll() {
+  const checked = $("print-all")?.checked;
+  document.querySelectorAll(".print-loc-cb").forEach((cb) => (cb.checked = checked));
+}
+
+export function confirmPrint() {
+  const selected = [...document.querySelectorAll(".print-loc-cb")]
+    .filter((cb) => cb.checked)
+    .map((cb) => cb.value);
+  if (!selected.length) {
+    toast("⚠️ Choisis au moins un emplacement");
+    return;
+  }
+  closeModal("modal-print-inv");
+  printInventory(selected);
+}
+
+export async function printInventory(locsFilter) {
   let JsBarcode = null;
   try {
     const mod = await import("https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/+esm");
@@ -386,9 +435,11 @@ export async function printInventory() {
     toast("⚠️ Codes-barres indisponibles, impression en texte");
   }
 
+  const filter = Array.isArray(locsFilter) && locsFilter.length ? new Set(locsFilter) : null;
   const groups = {};
   SHARED.invCounts.forEach((c) => {
     const loc = c.location || "Sans emplacement";
+    if (filter && !filter.has(loc)) return;
     (groups[loc] ||= []).push(c);
   });
   const locs = Object.keys(groups).sort((a, b) => a.localeCompare(b));
@@ -446,7 +497,7 @@ export function bindInventoryEvents() {
       case "inv-edit": openEditCount(btn.dataset.id); break;
       case "inv-del": deleteCount(btn.dataset.id); break;
       case "inv-csv": exportCsv(); break;
-      case "inv-print": printInventory(); break;
+      case "inv-print": openPrintDialog(); break;
       case "inv-close": closeInventory(); break;
       case "inv-togglemap":
         mapOpen = !mapOpen;

@@ -74,6 +74,8 @@ import {
   addCount,
   saveEditCount,
   generateLabel,
+  confirmPrint,
+  togglePrintAll,
   bindInventoryEvents,
 } from "./inventory.js";
 import { switchPanel, fabContextualOpen } from "./nav.js";
@@ -146,6 +148,9 @@ function bindAll() {
   bindClick("btn-add-count", addCount);
   bindClick("btn-save-edit-count", saveEditCount);
   bindClick("btn-gen-label", generateLabel);
+  bindClick("btn-print-confirm", confirmPrint);
+  const printAll = $("print-all");
+  if (printAll) printAll.addEventListener("change", togglePrintAll);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);
   bindClick("btn-add-vrac", addVrac);

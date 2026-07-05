@@ -1069,3 +1069,36 @@
   padding: 10px 14px;
   cursor: pointer;
 }
+
+/* ── Dialogue d'impression inventaire ───────────────── */
+.print-all-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+.print-loc-list { max-height: 45vh; overflow-y: auto; margin-bottom: 12px; }
+.print-loc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--bg2);
+  font-size: 0.9rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+.print-loc-row:last-child { border-bottom: none; }
+.print-loc-row span:first-of-type { flex: 1; }
+.print-loc-n {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink3);
+  background: var(--bg2);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.print-all-row input, .print-loc-row input { width: 18px; height: 18px; flex-shrink: 0; }
