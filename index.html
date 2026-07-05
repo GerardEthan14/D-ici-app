@@ -453,9 +453,8 @@
     <div class="modal-handle"></div>
     <div class="modal-title">📦 Ajouter un comptage</div>
     <div class="field"><label>Emplacement</label>
-      <select id="ic-loc" class="input-field"></select>
+      <input type="text" id="ic-loc" list="inv-loc-list" placeholder="ex : A1, Frigo 2, Allée B…" autocomplete="off">
     </div>
-    <div class="field"><label>…ou nouvel emplacement</label><input type="text" id="ic-loc-free" placeholder="ex : Frigo 2, Allée B" autocomplete="off"></div>
     <div class="field"><label>Nom du produit</label><input type="text" id="ic-name" placeholder="ex : Lait demi-écrémé 1L" autocomplete="off"></div>
     <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="ic-name" data-target-barcode="ic-barcode">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
@@ -477,9 +476,8 @@
     <div class="modal-title">✏️ Modifier le comptage</div>
     <input type="hidden" id="ic-e-id">
     <div class="field"><label>Emplacement</label>
-      <select id="ic-e-loc" class="input-field"></select>
+      <input type="text" id="ic-e-loc" list="inv-loc-list" placeholder="ex : A1, Frigo 2, Allée B…" autocomplete="off">
     </div>
-    <div class="field"><label>…ou nouvel emplacement</label><input type="text" id="ic-e-loc-free" placeholder="ex : Frigo 2, Allée B" autocomplete="off"></div>
     <div class="field"><label>Nom du produit</label><input type="text" id="ic-e-name" autocomplete="off"></div>
     <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="ic-e-name" data-target-barcode="ic-e-barcode">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
@@ -491,6 +489,18 @@
     </div>
     <div class="field"><label>Code-barres</label><input type="text" id="ic-e-barcode" autocomplete="off" inputmode="numeric"></div>
     <button class="btn btn-primary btn-full" id="btn-save-edit-count">Enregistrer</button>
+  </div>
+</div>
+
+<datalist id="inv-loc-list"></datalist>
+
+<div class="modal-overlay" id="modal-print-inv">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🖨️ Imprimer l'inventaire</div>
+    <label class="print-all-row"><input type="checkbox" id="print-all" checked> <strong>Tous les emplacements</strong></label>
+    <div id="print-loc-list" class="print-loc-list"></div>
+    <button class="btn btn-primary btn-full" id="btn-print-confirm">Imprimer la sélection</button>
   </div>
 </div>
 
