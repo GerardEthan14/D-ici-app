@@ -240,9 +240,12 @@ export function showExistingInvHint() {
   if (!$("ic-name").value && first.name) $("ic-name").value = first.name;
   if (first.unit) $("ic-unit").value = first.unit;
   el.classList.remove("hidden");
-  el.innerHTML = `<div class="ic-existing-hint">📌 Déjà compté : ${matches
-    .map((m) => `<strong>${esc(m.location)}</strong> (${esc(m.qty)} ${esc(m.unit || "")})`)
-    .join(" · ")}</div>`;
+  el.innerHTML = `<div class="ic-existing-hint">📌 Déjà compté <span class="ic-existing-sub">(clique pour modifier)</span> :
+    ${matches
+      .map(
+        (m) => `<button type="button" class="ic-existing-item" data-action="open-count" data-id="${esc(m.id)}"><strong>${esc(m.location)}</strong> · ${esc(m.qty)} ${esc(m.unit || "")}</button>`
+      )
+      .join("")}</div>`;
 }
 
 export async function addCount() {
@@ -550,6 +553,13 @@ export function bindInventoryEvents() {
   // Autocomplétion : réagit au code-barres scanné/saisi et au nom.
   $("ic-barcode")?.addEventListener("input", showExistingInvHint);
   $("ic-name")?.addEventListener("input", showExistingInvHint);
+  // Clic sur un "déjà compté" -> ouvre la fiche de ce comptage.
+  $("ic-existing")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action='open-count']");
+    if (!btn) return;
+    closeModal("modal-add-count");
+    openEditCount(btn.dataset.id);
+  });
 }
 
 /* Register renders for bus */
