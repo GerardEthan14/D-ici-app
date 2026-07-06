@@ -102,7 +102,7 @@ function fillLocDatalist() {
 // pour pouvoir les réutiliser (rayons, DLC, réserve…). Idempotent.
 function syncInvToCatalog() {
   SHARED.invCounts.forEach((c) => {
-    if (c.name) saveProductToCatalog(c.name, "", c.barcode || "");
+    if (c.name) saveProductToCatalog(c.name, "", c.barcode || "", { emplacementStock: c.location });
   });
 }
 
@@ -228,7 +228,7 @@ export async function addCount() {
     barcode,
     location: location || "Sans emplacement",
   });
-  saveProductToCatalog(name, "", barcode);
+  saveProductToCatalog(name, "", barcode, { emplacementStock: location });
   closeModal("modal-add-count");
   toast("✅ Comptage ajouté");
 }
@@ -274,7 +274,7 @@ export async function saveEditCount() {
     barcode,
     location: location || "Sans emplacement",
   });
-  saveProductToCatalog(name, "", barcode);
+  saveProductToCatalog(name, "", barcode, { emplacementStock: location });
   closeModal("modal-edit-count");
   toast("✅ Comptage modifié");
 }

@@ -14,21 +14,30 @@ const BARCODE_FIELD_MAP = {
   "si-name": "si-barcode",
 };
 
-export function saveProductToCatalog(name, supplier, barcode) {
+export function saveProductToCatalog(name, supplier, barcode, extra = {}) {
   if (!name || !app.firebaseMode) return;
   const existing = SHARED.products.find(
     (p) => p.name.toLowerCase() === name.toLowerCase()
   );
   if (existing) {
+    // On complète seulement les champs manquants (ne pas écraser une saisie manuelle).
     const patch = {};
     if (supplier && !existing.supplier) patch.supplier = supplier;
     if (barcode && !existing.barcode) patch.barcode = barcode;
+    if (extra.emplacementStock && !existing.emplacementStock) patch.emplacementStock = extra.emplacementStock;
+    if (extra.emplacementRayon && !existing.emplacementRayon) patch.emplacementRayon = extra.emplacementRayon;
     if (Object.keys(patch).length) {
       fbSet(`products/${existing.id}`, { ...existing, ...patch });
     }
     return;
   }
-  fbPush("products", { name, supplier: supplier || "", barcode: barcode || "" });
+  fbPush("products", {
+    name,
+    supplier: supplier || "",
+    barcode: barcode || "",
+    emplacementStock: extra.emplacementStock || "",
+    emplacementRayon: extra.emplacementRayon || "",
+  });
 }
 
 // Retrouve le nom d'un produit déjà connu à partir de son code-barres.

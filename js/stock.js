@@ -280,7 +280,8 @@ export async function addStockItem() {
     rayonId,
     barcode,
   });
-  saveProductToCatalog(name, "", barcode);
+  const rayon = SHARED.rayons.find((r) => r.id === rayonId);
+  saveProductToCatalog(name, "", barcode, { emplacementRayon: rayon ? rayon.name : "" });
   $("si-name").value = "";
   $("si-barcode").value = "";
   closeModal("modal-add-stock-item");
