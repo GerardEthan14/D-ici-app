@@ -1101,4 +1101,11 @@
   border-radius: 999px;
   padding: 1px 8px;
 }
-.print-all-row input, .print-loc-row input { width: 18px; height: 18px; flex-shrink: 0; }
+.print-all-row input[type="checkbox"], .print-loc-row input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: auto;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--accent, #2d6a4f);
+}
