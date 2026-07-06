@@ -151,6 +151,7 @@ function subscribeAll() {
       SHARED[path] = val ? Object.entries(val).map(([id, v]) => ({ ...v, id })) : [];
       render[path]?.();
       if (path === "reserve" || path === "invCounts") render.zones?.();
+      if (path === "invCounts") render.reserve?.();
       if (path === "dlc") setSyncStatus("connected", "Synchronisé");
     });
     _unsubscribers.push(unsub);
