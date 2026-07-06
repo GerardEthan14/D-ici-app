@@ -115,8 +115,7 @@ function bindAll() {
     bindClick("tf-" + f, () => filterTodo(f))
   );
 
-  // DLC view toggle
-  bindClick("dvt-list", () => switchDlcView("list"));
+  // DLC view toggle (Schéma + Vrac)
   bindClick("dvt-schema", () => switchDlcView("schema"));
   bindClick("dvt-vrac", () => switchDlcView("vrac"));
 

@@ -1164,3 +1164,21 @@
   cursor: pointer;
 }
 .ic-existing-item:active { transform: scale(0.95); }
+
+/* Bouton valider (traiter) dans le schéma DLC */
+.dlc-check-sm {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--green, #2d6a4f);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green, #2d6a4f);
+}
+.dlc-check-sm svg { opacity: 1; stroke: currentColor; }
+.dlc-check-sm:active { background: var(--green-light); }
+.schema-zone-qty { font-weight: 400; color: var(--ink3); font-size: 0.76rem; }
