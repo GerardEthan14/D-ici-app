@@ -177,18 +177,35 @@ const editBtn = (id) =>
 const delBtn = (id) =>
   `<button class="icon-btn danger icon-sm" data-action="del-reserve" data-id="${esc(id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>`;
 
+// Éléments affichés dans la réserve : entrées Réserve + produits comptés
+// dans l'inventaire (lecture seule, avec la quantité).
+function reserveItems() {
+  const items = SHARED.reserve.map((r) => ({ ...r }));
+  SHARED.invCounts.forEach((c) => {
+    items.push({
+      id: c.id,
+      name: c.name,
+      location: c.location,
+      notes: c.qty ? `📦 Inventaire : ${c.qty} ${c.unit || ""}`.trim() : "📦 Inventaire",
+      _inv: true,
+    });
+  });
+  return items;
+}
+
 export function renderReserve() {
   const el = $("reserve-list");
   if (!el) return;
   const searchEl = $("res-search");
   const q = searchEl ? searchEl.value.trim().toLowerCase() : "";
+  const source = reserveItems();
   const list = q
-    ? SHARED.reserve.filter(
+    ? source.filter(
         (r) =>
           (r.name || "").toLowerCase().includes(q) ||
           (r.location || "").toLowerCase().includes(q)
       )
-    : SHARED.reserve;
+    : source;
 
   if (!list.length) {
     el.innerHTML = q
@@ -212,7 +229,7 @@ export function renderReserve() {
           <div class="reserve-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
           <div class="reserve-body"><div class="reserve-name">${hi(esc(r.name))}</div>${r.notes ? `<div class="reserve-notes">${esc(r.notes)}</div>` : ""}</div>
           <div class="reserve-loc">${hi(esc(r.location))}</div>
-          <div class="reserve-actions">${editBtn(r.id)}${delBtn(r.id)}</div>
+          <div class="reserve-actions">${r._inv ? "" : editBtn(r.id) + delBtn(r.id)}</div>
         </div>`
         )
         .join("") +
@@ -256,7 +273,7 @@ export function renderReserve() {
             (r) => `
           <div class="reserve-row" data-action="pulse-zone" data-loc="${esc(loc)}">
             <div class="reserve-body"><div class="reserve-name">${esc(r.name)}</div>${r.notes ? `<div class="reserve-notes">${esc(r.notes)}</div>` : ""}</div>
-            <div class="reserve-actions">${editBtn(r.id)}${delBtn(r.id)}</div>
+            <div class="reserve-actions">${r._inv ? "" : editBtn(r.id) + delBtn(r.id)}</div>
           </div>`
           )
           .join("")}

@@ -142,13 +142,18 @@ export function bindScanButtons() {
     btn.addEventListener("click", () => {
       startScanner(async (code) => {
         const bcEl = btn.dataset.targetBarcode ? $(btn.dataset.targetBarcode) : null;
-        if (bcEl) bcEl.value = code;
         const nameEl = btn.dataset.targetName ? $(btn.dataset.targetName) : null;
+        // Notifie les autres modules (ex: autocomplétion inventaire) qu'un champ a changé.
+        const fire = (el) => el && el.dispatchEvent(new Event("input", { bubbles: true }));
+        if (bcEl) {
+          bcEl.value = code;
+          fire(bcEl);
+        }
 
         // 1) Déjà connu dans le catalogue (scanner intelligent) ?
         const known = findProductByBarcode(code);
         if (known) {
-          if (nameEl) nameEl.value = known;
+          if (nameEl) { nameEl.value = known; fire(nameEl); }
           toast(`✅ ${known}`, true);
           return;
         }
@@ -157,7 +162,7 @@ export function bindScanButtons() {
         toast("🔎 Recherche du produit…");
         const name = await lookupProductName(code);
         if (name) {
-          if (nameEl) nameEl.value = name;
+          if (nameEl) { nameEl.value = name; fire(nameEl); }
           saveProductToCatalog(name, "", code); // mémorise pour la prochaine fois
           toast(`✅ ${name}`, true);
         } else {

@@ -191,6 +191,16 @@ export function renderInventory() {
     <button class="btn btn-danger-ghost" data-action="inv-close">Clôturer</button>
   </div>`;
 
+  // Boutons flottants (toujours accessibles sans scroller)
+  html += `<div class="inv-fab-bar">
+    <button class="inv-fab" data-action="inv-print" aria-label="Imprimer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
+    <button class="inv-fab inv-fab-primary" data-action="inv-add" aria-label="Ajouter un comptage">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>`;
+
   el.innerHTML = html;
   if (mapOpen) renderInvMap();
 }
@@ -205,7 +215,34 @@ export function openAddCount(prefLoc) {
   $("ic-name").value = "";
   $("ic-qty").value = "";
   $("ic-barcode").value = "";
+  const ex = $("ic-existing");
+  if (ex) { ex.innerHTML = ""; ex.classList.add("hidden"); }
   openModal("modal-add-count");
+}
+
+// Autocomplétion : si le produit (par code-barres ou nom) a déjà été compté,
+// pré-remplit nom + unité et affiche où il a déjà été trouvé (avec quantités).
+export function showExistingInvHint() {
+  const el = $("ic-existing");
+  if (!el) return;
+  const code = $("ic-barcode").value.trim();
+  const name = $("ic-name").value.trim();
+  let matches = [];
+  if (code) matches = SHARED.invCounts.filter((c) => c.barcode && c.barcode === code);
+  if (!matches.length && name)
+    matches = SHARED.invCounts.filter((c) => (c.name || "").toLowerCase() === name.toLowerCase());
+  if (!matches.length) {
+    el.innerHTML = "";
+    el.classList.add("hidden");
+    return;
+  }
+  const first = matches[0];
+  if (!$("ic-name").value && first.name) $("ic-name").value = first.name;
+  if (first.unit) $("ic-unit").value = first.unit;
+  el.classList.remove("hidden");
+  el.innerHTML = `<div class="ic-existing-hint">📌 Déjà compté : ${matches
+    .map((m) => `<strong>${esc(m.location)}</strong> (${esc(m.qty)} ${esc(m.unit || "")})`)
+    .join(" · ")}</div>`;
 }
 
 export async function addCount() {
@@ -510,6 +547,9 @@ export function bindInventoryEvents() {
     const g = e.target.closest(".zone-group");
     if (g) toggleZoneCounted(g.dataset.zoneId);
   });
+  // Autocomplétion : réagit au code-barres scanné/saisi et au nom.
+  $("ic-barcode")?.addEventListener("input", showExistingInvHint);
+  $("ic-name")?.addEventListener("input", showExistingInvHint);
 }
 
 /* Register renders for bus */
