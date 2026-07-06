@@ -100,13 +100,12 @@ function bindComboInputs(pairs, handler) {
 
 function bindAll() {
   // Nav
-  ["todo", "dlc", "fournisseurs", "reserve", "stock", "profil"].forEach((p) =>
+  ["todo", "dlc", "fournisseurs", "stock", "profil"].forEach((p) =>
     bindClick("nav-" + p, () => switchPanel(p))
   );
 
-  // Stock sub-tabs
-  bindClick("stab-week", () => switchStockView("week"));
-  bindClick("stab-rayons", () => switchStockView("rayons"));
+  // Stock sub-tabs (Réserve + Inventaire)
+  bindClick("stab-reserve", () => switchStockView("reserve"));
   bindClick("stab-inventory", () => switchStockView("inventory"));
 
   // Todo tabs / filters
