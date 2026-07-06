@@ -62,12 +62,16 @@ export function getZoneData(z) {
 function getZonesWithStock() {
   const set = new Set();
   const labels = ZONE_CONFIG.map((z) => getZoneData(z));
-  SHARED.reserve.forEach((r) => {
-    if (!r.location) return;
-    const locLower = r.location.trim().toLowerCase();
+  const addLoc = (loc) => {
+    if (!loc) return;
+    const locLower = loc.trim().toLowerCase();
     const match = labels.find((z) => z.label.trim().toLowerCase() === locLower);
     if (match) set.add(match.id);
-  });
+  };
+  // Le plan se base sur la base de données : produits en réserve
+  // ET produits comptés dans l'inventaire.
+  SHARED.reserve.forEach((r) => addLoc(r.location));
+  SHARED.invCounts.forEach((c) => addLoc(c.location));
   return set;
 }
 

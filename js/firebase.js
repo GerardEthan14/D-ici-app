@@ -150,7 +150,7 @@ function subscribeAll() {
       const val = snap.val();
       SHARED[path] = val ? Object.entries(val).map(([id, v]) => ({ ...v, id })) : [];
       render[path]?.();
-      if (path === "reserve") render.zones?.();
+      if (path === "reserve" || path === "invCounts") render.zones?.();
       if (path === "dlc") setSyncStatus("connected", "Synchronisé");
     });
     _unsubscribers.push(unsub);
