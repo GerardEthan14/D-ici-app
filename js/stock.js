@@ -51,17 +51,16 @@ function isChecked(item, weekKey) {
 
 /* ── Sub-tabs ───────────────────────────────────────── */
 
-let stockView = "week";
+// Onglet Stock fusionné : Réserve + Inventaire (les rayons sont mis de côté).
+let stockView = "reserve";
 export function switchStockView(v) {
   stockView = v;
-  $("stock-week-view").classList.toggle("hidden", v !== "week");
-  $("stock-rayons-view").classList.toggle("hidden", v !== "rayons");
-  $("stock-inventory-view").classList.toggle("hidden", v !== "inventory");
-  $("stab-week").classList.toggle("active", v === "week");
-  $("stab-rayons").classList.toggle("active", v === "rayons");
-  $("stab-inventory").classList.toggle("active", v === "inventory");
+  $("stock-reserve-view")?.classList.toggle("hidden", v !== "reserve");
+  $("stock-inventory-view")?.classList.toggle("hidden", v !== "inventory");
+  $("stab-reserve")?.classList.toggle("active", v === "reserve");
+  $("stab-inventory")?.classList.toggle("active", v === "inventory");
   if (v === "inventory") render.inventory?.();
-  else renderStock();
+  else render.reserve?.();
 }
 
 /* ── Vue « Cette semaine » ──────────────────────────── */
@@ -341,4 +340,4 @@ export function bindStockEvents() {
 /* Register renders for bus */
 render.rayons = renderStock;
 render.stockItems = renderStock;
-render.stock = renderStock;
+render.stock = () => switchStockView(stockView);
