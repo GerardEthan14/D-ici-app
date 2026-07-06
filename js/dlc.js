@@ -22,18 +22,18 @@ export function dlcStatus(d) {
 
 /* ── Views ──────────────────────────────────────────── */
 
-let dlcView = "list";
+let dlcView = "schema";
 
 export function switchDlcView(v) {
   dlcView = v;
-  $("dlc-view-list").classList.toggle("hidden", v !== "list");
-  $("dlc-view-schema").classList.toggle("hidden", v !== "schema");
-  $("dlc-view-vrac").classList.toggle("hidden", v !== "vrac");
-  $("dvt-list").classList.toggle("active", v === "list");
-  $("dvt-schema").classList.toggle("active", v === "schema");
-  $("dvt-vrac").classList.toggle("active", v === "vrac");
+  $("dlc-view-schema")?.classList.toggle("hidden", v !== "schema");
+  $("dlc-view-vrac")?.classList.toggle("hidden", v !== "vrac");
+  $("dvt-schema")?.classList.toggle("active", v === "schema");
+  $("dvt-vrac")?.classList.toggle("active", v === "vrac");
   const searchWrap = document.querySelector("#panel-dlc > .search-wrap");
   if (searchWrap) searchWrap.classList.toggle("hidden", v === "vrac");
+  const focus = $("dlc-focus");
+  if (focus) focus.classList.toggle("hidden", v === "vrac");
   if (v === "schema") renderDlcSchema();
   if (v === "vrac") render.vrac?.();
   render.updateFab?.();
@@ -132,9 +132,14 @@ export function enableDlcReminders() {
 
 /* ── List render ────────────────────────────────────── */
 
+// Vue principale = schéma (avec focus + validation). Conservé pour le bus/recherche.
 export function renderDlc() {
   renderDlcFocus();
-  const el = $("dlc-list");
+  renderDlcSchema();
+}
+
+export function renderDlcSchema() {
+  const el = $("dlc-schema-content");
   if (!el) return;
   const searchEl = $("dlc-search");
   const q = searchEl ? searchEl.value.trim().toLowerCase() : "";
@@ -146,57 +151,8 @@ export function renderDlc() {
       )
     : SHARED.dlc;
   if (focusMode) list = list.filter((d) => dlcStatus(d.date).days <= 7);
-
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun résultat." : "Aucun produit enregistré."}</p></div>`;
-    return;
-  }
-
-  const sorted = [...list].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
-  const byZone = { expired: [], critical: [], urgent: [], ok: [] };
-  sorted.forEach((x) => byZone[dlcStatus(x.date).zone].push(x));
-
-  const section = (lbl, arr) =>
-    !arr.length
-      ? ""
-      : `<div class="dlc-section-title">${lbl}</div>` + arr.map(dlcRow).join("");
-
-  el.innerHTML =
-    section("☠️ PÉRIMÉS", byZone.expired) +
-    section("🚨 Critiques – moins de 7j", byZone.critical) +
-    section("⚠️ Attention – 8 à 30j", byZone.urgent) +
-    section("✅ OK – plus de 30j", byZone.ok);
-
-  if (dlcView === "schema") renderDlcSchema();
-}
-
-function dlcRow(v) {
-  const s = dlcStatus(v.date);
-  const by =
-    v._by && v._by !== app.username
-      ? `<span class="dlc-row-by">par ${esc(v._by)}</span>`
-      : "";
-  return `<div class="dlc-row">
-    <button class="dlc-check" data-action="remove-dlc" data-id="${esc(v.id)}" data-days="${s.days}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-    </button>
-    <div class="dlc-info">
-      <div class="dlc-name">${esc(v.name)}</div>
-      <div class="dlc-meta">${v.supplier ? `🏭 ${esc(v.supplier)}` : ""}${v.qty ? `<span>~${esc(v.qty)}</span>` : ""}${by}</div>
-    </div>
-    <div class="dlc-chip ${s.cls}">${fmtD(v.date)}<br><small>${s.label}</small></div>
-    <button class="icon-btn icon-edit" data-action="edit-dlc" data-id="${esc(v.id)}">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-    </button>
-  </div>`;
-}
-
-export function renderDlcSchema() {
-  const el = $("dlc-schema-content");
-  if (!el) return;
-  const list = SHARED.dlc;
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><p>Aucun produit enregistré.</p></div>`;
     return;
   }
   const sorted = [...list].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
@@ -258,7 +214,14 @@ export function renderDlcSchema() {
     html += `<div class="schema-zone-card" style="border-left:4px solid ${z.col}"><div class="schema-zone-title" style="color:${z.col}">${z.title}</div>${z.arr
       .map((v) => {
         const s = dlcStatus(v.date);
-        return `<div class="schema-zone-row"><div class="schema-zone-name">${esc(v.name)}</div><div class="schema-zone-detail">${v.supplier ? `<span>🏭 ${esc(v.supplier)}</span>` : ""}<span class="schema-days-chip" style="background:${z.col};color:#fff">${s.label}</span></div></div>`;
+        return `<div class="schema-zone-row">
+          <button class="dlc-check dlc-check-sm" data-action="remove-dlc" data-id="${esc(v.id)}" data-days="${s.days}" title="Valider (traiter)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <div class="schema-zone-name">${esc(v.name)}${v.qty ? ` <span class="schema-zone-qty">~${esc(v.qty)}</span>` : ""}</div>
+          <div class="schema-zone-detail">${v.supplier ? `<span>🏭 ${esc(v.supplier)}</span>` : ""}<span class="schema-days-chip" style="background:${z.col};color:#fff">${fmtD(v.date)} · ${s.label}</span></div>
+          <button class="icon-btn icon-edit icon-sm" data-action="edit-dlc" data-id="${esc(v.id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        </div>`;
       })
       .join("")}</div>`;
   });
@@ -349,7 +312,7 @@ export async function saveEditDlc() {
 /* ── Bindings ───────────────────────────────────────── */
 
 export function bindDlcEvents() {
-  $("dlc-list")?.addEventListener("click", (e) => {
+  $("dlc-schema-content")?.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
     if (btn.dataset.action === "remove-dlc") {
