@@ -17,11 +17,20 @@ const TYPE_LABELS = {
 export function renderSuppliers() {
   const el = $("sup-list");
   if (!el) return;
-  if (!SHARED.suppliers.length) {
-    el.innerHTML = `<div class="empty-state"><p>Aucune fiche fournisseur.</p></div>`;
+  const q = ($("sup-search")?.value || "").trim().toLowerCase();
+  let list = SHARED.suppliers;
+  if (q)
+    list = list.filter(
+      (s) =>
+        (s.name || "").toLowerCase().includes(q) ||
+        (s.contact || "").toLowerCase().includes(q) ||
+        (s.notes || "").toLowerCase().includes(q)
+    );
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun fournisseur trouvé." : "Aucune fiche fournisseur."}</p></div>`;
     return;
   }
-  el.innerHTML = SHARED.suppliers
+  el.innerHTML = list
     .map(
       (s) => `
     <div class="sup-card">

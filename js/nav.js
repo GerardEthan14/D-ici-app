@@ -4,7 +4,7 @@ import { renderAdminPanel, renderLeaderboard } from "./profil.js";
 import { getDlcView } from "./dlc.js";
 import { render } from "./bus.js";
 
-const PANELS = ["todo", "dlc", "fournisseurs", "stock", "profil"];
+const PANELS = ["todo", "dlc", "info", "stock", "profil"];
 
 let currentPanel = "todo";
 export function getCurrentPanel() {
@@ -24,14 +24,14 @@ export function switchPanel(p) {
     renderAdminPanel();
   }
   if (p === "stock") render.stock?.();
+  if (p === "info") render.info?.();
   updateFabVisibility();
 }
 
 export function updateFabVisibility() {
   const fab = $("fab-add");
   if (!fab) return;
-  const show =
-    currentPanel === "dlc" || currentPanel === "fournisseurs";
+  const show = currentPanel === "dlc";
   fab.classList.toggle("visible", show);
 }
 
@@ -39,7 +39,7 @@ export function fabContextualOpen(openModal) {
   if (currentPanel === "dlc") {
     if (getDlcView() === "vrac") openModal("modal-add-vrac");
     else openModal("modal-add-dlc");
-  } else if (currentPanel === "fournisseurs") openModal("modal-add-supplier");
+  }
 }
 
 render.updateFab = updateFabVisibility;

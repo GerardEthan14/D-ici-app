@@ -71,6 +71,7 @@ import {
   bindStockEvents,
 } from "./stock.js";
 import { bindScanButtons } from "./scanner.js";
+import { switchInfoView, bindInfoEvents } from "./info.js";
 import {
   addCount,
   saveEditCount,
@@ -100,9 +101,14 @@ function bindComboInputs(pairs, handler) {
 
 function bindAll() {
   // Nav
-  ["todo", "dlc", "fournisseurs", "stock", "profil"].forEach((p) =>
+  ["todo", "dlc", "info", "stock", "profil"].forEach((p) =>
     bindClick("nav-" + p, () => switchPanel(p))
   );
+
+  // Info sub-tabs (Produit + Fournisseur)
+  bindClick("itab-produit", () => switchInfoView("produit"));
+  bindClick("itab-fournisseur", () => switchInfoView("fournisseur"));
+  $("sup-search")?.addEventListener("input", renderSuppliers);
 
   // Stock sub-tabs (Réserve + Inventaire)
   bindClick("stab-reserve", () => switchStockView("reserve"));
@@ -210,6 +216,7 @@ function bindAll() {
   bindReserveEvents();
   bindStockEvents();
   bindInventoryEvents();
+  bindInfoEvents();
   bindScanButtons();
   bindAdminEvents();
 }

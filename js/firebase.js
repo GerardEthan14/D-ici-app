@@ -152,7 +152,8 @@ function subscribeAll() {
       render[path]?.();
       if (path === "reserve" || path === "invCounts") render.zones?.();
       if (path === "invCounts") render.reserve?.();
-      if (path === "dlc") setSyncStatus("connected", "Synchronisé");
+      if (path === "dlc") { render.infoProducts?.(); setSyncStatus("connected", "Synchronisé"); }
+      if (path === "suppliers") render.infoProducts?.();
     });
     _unsubscribers.push(unsub);
   });
@@ -163,6 +164,7 @@ function subscribeAll() {
     SHARED.products = val ? Object.entries(val).map(([id, v]) => ({ ...v, id })) : [];
     render.products?.();
     render.zones?.();
+    render.infoProducts?.();
   });
   _unsubscribers.push(unsubProducts);
 
