@@ -4,6 +4,7 @@ import { fbSet, fbRemove, sp, loadAllUsers, saveUserStore, setUserRole } from ".
 import { getLevel } from "./rpg.js";
 import { ADMIN_EMAIL, STORES, ROLE_LABELS } from "./config.js";
 import { closeModal, openModal } from "./modals.js";
+import { getZoneConfig, getZoneData } from "./reserve.js";
 import { render } from "./bus.js";
 
 /* ── Helpers ────────────────────────────────────────── */
@@ -265,7 +266,7 @@ export function renderAdminProducts() {
       <div class="admin-product-icon">📦</div>
       <div class="admin-info">
         <div class="admin-name">${esc(p.name)}</div>
-        ${p.supplier ? `<div class="admin-detail">🏭 ${esc(p.supplier)}</div>` : ""}
+        <div class="admin-detail">${p.supplier ? `🏭 ${esc(p.supplier)}` : ""}${p.emplacementStock ? ` · 🏠 ${esc(p.emplacementStock)}` : ""}${p.emplacementRayon ? ` · 🗂️ ${esc(p.emplacementRayon)}` : ""}${p.barcode ? ` · 🔖 ${esc(p.barcode)}` : ""}</div>
       </div>
       <div class="admin-actions">
         <button class="icon-btn icon-edit icon-sm" data-action="edit-product" data-id="${esc(p.id)}">
@@ -278,6 +279,55 @@ export function renderAdminProducts() {
     </div>`
     )
     .join("");
+}
+
+/* ── Fiche produit (emplacement stock + rayon) ──────── */
+
+function fillProdDatalists() {
+  const zEl = $("prod-stock-list");
+  if (zEl) {
+    const labels = [...new Set(getZoneConfig().map((z) => getZoneData(z).label))];
+    zEl.innerHTML = labels.map((l) => `<option value="${esc(l)}"></option>`).join("");
+  }
+  const rEl = $("prod-rayon-list");
+  if (rEl) {
+    const rayons = [...SHARED.rayons].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    rEl.innerHTML = rayons.map((r) => `<option value="${esc(r.name)}"></option>`).join("");
+  }
+}
+
+export function openProductSheet(id) {
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
+  fillProdDatalists();
+  $("pe-id").value = id;
+  $("pe-name").value = p.name || "";
+  $("pe-sup").value = p.supplier || "";
+  $("pe-barcode").value = p.barcode || "";
+  $("pe-stock").value = p.emplacementStock || "";
+  $("pe-rayon").value = p.emplacementRayon || "";
+  openModal("modal-edit-product");
+}
+
+export function saveProductSheet() {
+  const id = $("pe-id").value;
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
+  const name = $("pe-name").value.trim();
+  if (!name) {
+    toast("⚠️ Nom requis");
+    return;
+  }
+  fbSet("products/" + id, {
+    ...p,
+    name,
+    supplier: $("pe-sup").value.trim(),
+    barcode: $("pe-barcode").value.trim(),
+    emplacementStock: $("pe-stock").value.trim(),
+    emplacementRayon: $("pe-rayon").value.trim(),
+  });
+  closeModal("modal-edit-product");
+  toast("✅ Fiche produit enregistrée");
 }
 
 export function bindAdminEvents() {
@@ -294,15 +344,7 @@ export function bindAdminEvents() {
       if (p && confirm(`Supprimer "${p.name}" du catalogue ?`))
         fbRemove("products/" + btn.dataset.id);
     } else if (btn.dataset.action === "edit-product") {
-      const p = SHARED.products.find((x) => x.id === btn.dataset.id);
-      if (!p) return;
-      const newName = prompt("Nom du produit :", p.name);
-      if (newName === null) return;
-      const newSup = prompt("Fournisseur :", p.supplier || "");
-      if (newSup === null) return;
-      if (!newName.trim()) { toast("⚠️ Nom requis"); return; }
-      fbSet("products/" + p.id, { ...p, name: newName.trim(), supplier: (newSup || "").trim() });
-      toast("✅ Produit modifié");
+      openProductSheet(btn.dataset.id);
     }
   });
   $("admin-prod-search")?.addEventListener("input", renderAdminProducts);

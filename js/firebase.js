@@ -161,6 +161,7 @@ function subscribeAll() {
     const val = snap.val();
     SHARED.products = val ? Object.entries(val).map(([id, v]) => ({ ...v, id })) : [];
     render.products?.();
+    render.zones?.();
   });
   _unsubscribers.push(unsubProducts);
 

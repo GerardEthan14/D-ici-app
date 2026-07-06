@@ -68,10 +68,11 @@ function getZonesWithStock() {
     const match = labels.find((z) => z.label.trim().toLowerCase() === locLower);
     if (match) set.add(match.id);
   };
-  // Le plan se base sur la base de données : produits en réserve
-  // ET produits comptés dans l'inventaire.
+  // Le plan se base sur la base de données : produits en réserve,
+  // produits comptés dans l'inventaire, et emplacement stock des fiches produit.
   SHARED.reserve.forEach((r) => addLoc(r.location));
   SHARED.invCounts.forEach((c) => addLoc(c.location));
+  SHARED.products.forEach((p) => addLoc(p.emplacementStock));
   return set;
 }
 
@@ -299,7 +300,7 @@ export async function addReserve() {
     location: loc,
     notes: $("rv-notes").value.trim(),
   });
-  if ($("rv-save-product").checked) saveProductToCatalog(name, "");
+  if ($("rv-save-product").checked) saveProductToCatalog(name, "", "", { emplacementStock: loc });
   LOCAL.rpg.reserveAdded = (LOCAL.rpg.reserveAdded || 0) + 1;
   LOCAL.rpg.reserveLocs = getLocations().length;
   gainXP("reserve_add");
