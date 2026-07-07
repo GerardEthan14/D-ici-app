@@ -361,10 +361,11 @@
         <div class="dlc-suggestions" id="dlc-prod-suggestions"></div>
       </div>
     </div>
-    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="dlc-prod">
+    <button type="button" class="btn btn-ghost btn-full scan-btn" data-target-name="dlc-prod" data-target-barcode="dlc-barcode">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
       Scanner un code-barres
     </button>
+    <div class="field"><label>Code-barres (optionnel)</label><input type="text" id="dlc-barcode" placeholder="scanné ou saisi" autocomplete="off" inputmode="numeric"></div>
     <div class="field"><label>Fournisseur</label>
       <div class="combo-wrap">
         <input type="text" id="dlc-sup" placeholder="Taper pour chercher ou créer…" autocomplete="off">
@@ -607,6 +608,7 @@
     </div>
     <div class="field"><label>Date limite de consommation</label><input type="date" id="edit-dlc-date"></div>
     <div class="field"><label>Quantité approximative</label><input type="text" id="edit-dlc-qty" autocomplete="off"></div>
+    <div class="field"><label>Code-barres (optionnel)</label><input type="text" id="edit-dlc-barcode" autocomplete="off" inputmode="numeric"></div>
     <button class="btn btn-primary btn-full" id="btn-save-edit-dlc">Enregistrer les modifications</button>
   </div>
 </div>
