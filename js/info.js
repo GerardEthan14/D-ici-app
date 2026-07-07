@@ -22,6 +22,35 @@ export function switchInfoView(v) {
 
 /* ── Vue Produit ────────────────────────────────────── */
 
+// Liste unifiée : produits du catalogue + produits ayant une DLC
+// (pour que les DLC apparaissent même si le produit n'est pas au catalogue).
+function getInfoProducts() {
+  const map = new Map();
+  const ensure = (name) => {
+    const k = (name || "").trim().toLowerCase();
+    if (!k) return null;
+    if (!map.has(k)) {
+      map.set(k, { name, supplier: "", barcode: "", emplacementStock: "", emplacementRayon: "", id: null });
+    }
+    return map.get(k);
+  };
+  SHARED.products.forEach((p) => {
+    const e = ensure(p.name);
+    if (!e) return;
+    e.id = p.id;
+    if (p.supplier && !e.supplier) e.supplier = p.supplier;
+    if (p.barcode && !e.barcode) e.barcode = p.barcode;
+    if (p.emplacementStock && !e.emplacementStock) e.emplacementStock = p.emplacementStock;
+    if (p.emplacementRayon && !e.emplacementRayon) e.emplacementRayon = p.emplacementRayon;
+  });
+  SHARED.dlc.forEach((d) => {
+    const e = ensure(d.name);
+    if (!e) return;
+    if (d.supplier && !e.supplier) e.supplier = d.supplier;
+  });
+  return [...map.values()];
+}
+
 function dlcsForProduct(p) {
   const key = (p.name || "").toLowerCase();
   return SHARED.dlc
@@ -36,7 +65,8 @@ function dlcChip(d) {
 
 function infoProductCard(p) {
   const dlcs = dlcsForProduct(p);
-  const isOpen = expanded.has(p.id);
+  const pkey = (p.name || "").toLowerCase();
+  const isOpen = expanded.has(pkey);
 
   let dlcHtml;
   if (!dlcs.length) {
@@ -44,7 +74,7 @@ function infoProductCard(p) {
   } else {
     dlcHtml = dlcChip(dlcs[0]);
     if (dlcs.length > 1) {
-      dlcHtml += `<button class="info-dlc-more" data-action="toggle-dlc" data-id="${esc(p.id)}">${isOpen ? "▼" : "▶"} ${dlcs.length}</button>`;
+      dlcHtml += `<button class="info-dlc-more" data-action="toggle-dlc" data-key="${esc(pkey)}">${isOpen ? "▼" : "▶"} ${dlcs.length}</button>`;
     }
   }
 
@@ -55,7 +85,7 @@ function infoProductCard(p) {
 
   return `<div class="info-card">
     <div class="info-card-top">
-      <div class="info-card-main" data-action="open-prod" data-id="${esc(p.id)}">
+      <div class="info-card-main" data-action="open-prod" data-id="${p.id ? esc(p.id) : ""}">
         <div class="info-card-name">${esc(p.name)}</div>
         <div class="info-card-meta">
           ${p.supplier ? `<button type="button" class="info-chip info-sup-link" data-action="open-sup" data-sup="${esc(p.supplier)}">🏭 ${esc(p.supplier)}</button>` : ""}
@@ -74,7 +104,7 @@ export function renderInfoProducts() {
   const el = $("info-prod-list");
   if (!el) return;
   const q = ($("info-prod-search")?.value || "").trim().toLowerCase();
-  let list = SHARED.products;
+  let list = getInfoProducts();
   if (q)
     list = list.filter(
       (p) =>
@@ -106,12 +136,15 @@ export function bindInfoEvents() {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
     const a = btn.dataset.action;
-    if (a === "open-prod") openProductSheet(btn.dataset.id);
+    if (a === "open-prod") {
+      if (btn.dataset.id) openProductSheet(btn.dataset.id);
+      else toast("Ce produit n'a pas encore de fiche (seulement une DLC)");
+    }
     else if (a === "open-sup") openSupplierByName(btn.dataset.sup);
     else if (a === "toggle-dlc") {
-      const id = btn.dataset.id;
-      if (expanded.has(id)) expanded.delete(id);
-      else expanded.add(id);
+      const k = btn.dataset.key;
+      if (expanded.has(k)) expanded.delete(k);
+      else expanded.add(k);
       renderInfoProducts();
     }
   });
