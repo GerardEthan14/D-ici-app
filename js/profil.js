@@ -305,7 +305,8 @@ export function openProductSheet(id) {
   $("pe-sup").value = p.supplier || "";
   $("pe-barcode").value = p.barcode || "";
   $("pe-stock").value = p.emplacementStock || "";
-  $("pe-rayon").value = p.emplacementRayon || "";
+  $("pe-dlc").value = p.dlc || "";
+  $("pe-dlcqty").value = p.dlcQty || "";
   openModal("modal-edit-product");
 }
 
@@ -324,7 +325,8 @@ export function saveProductSheet() {
     supplier: $("pe-sup").value.trim(),
     barcode: $("pe-barcode").value.trim(),
     emplacementStock: $("pe-stock").value.trim(),
-    emplacementRayon: $("pe-rayon").value.trim(),
+    dlc: $("pe-dlc").value,
+    dlcQty: $("pe-dlcqty").value.trim(),
   });
   closeModal("modal-edit-product");
   toast("✅ Fiche produit enregistrée");

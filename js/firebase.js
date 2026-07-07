@@ -152,7 +152,7 @@ function subscribeAll() {
       render[path]?.();
       if (path === "reserve" || path === "invCounts") render.zones?.();
       if (path === "invCounts") render.reserve?.();
-      if (path === "dlc") { render.infoProducts?.(); setSyncStatus("connected", "Synchronisé"); }
+      if (path === "dlc") { render.migrateDlc?.(); render.infoProducts?.(); setSyncStatus("connected", "Synchronisé"); }
       if (path === "suppliers") render.infoProducts?.();
     });
     _unsubscribers.push(unsub);
@@ -165,6 +165,7 @@ function subscribeAll() {
     render.products?.();
     render.zones?.();
     render.infoProducts?.();
+    render.dlc?.();
   });
   _unsubscribers.push(unsubProducts);
 
