@@ -374,10 +374,6 @@
     </div>
     <div class="field"><label>Date limite de consommation</label><input type="date" id="dlc-date"></div>
     <div class="field"><label>Quantité approximative</label><input type="text" id="dlc-qty" placeholder="ex : 12 bouteilles" autocomplete="off"></div>
-    <label class="toggle-row" for="dlc-save-product">
-      <span class="toggle-label">📋 Enregistrer dans le catalogue</span>
-      <span class="toggle-pill"><input type="checkbox" id="dlc-save-product"><span class="toggle-knob"></span></span>
-    </label>
     <button class="btn btn-primary btn-full" id="btn-add-dlc">Enregistrer (+10 XP)</button>
   </div>
 </div>
@@ -529,8 +525,11 @@
     <div class="field"><label>Nom</label><input type="text" id="pe-name" autocomplete="off"></div>
     <div class="field"><label>Fournisseur</label><input type="text" id="pe-sup" autocomplete="off"></div>
     <div class="field"><label>Code-barres</label><input type="text" id="pe-barcode" autocomplete="off" inputmode="numeric"></div>
-    <div class="field"><label>🏠 Emplacement stock (réserve)</label><input type="text" id="pe-stock" list="prod-stock-list" placeholder="ex : A1, K2…" autocomplete="off"></div>
-    <div class="field"><label>🗂️ Emplacement rayon</label><input type="text" id="pe-rayon" list="prod-rayon-list" placeholder="ex : Crèmerie, Boissons…" autocomplete="off"></div>
+    <div class="field"><label>🏠 Emplacement (réserve)</label><input type="text" id="pe-stock" list="prod-stock-list" placeholder="ex : A1, K2…" autocomplete="off"></div>
+    <div class="ic-qty-row">
+      <div class="field"><label>📅 DLC</label><input type="date" id="pe-dlc"></div>
+      <div class="field"><label>Quantité DLC</label><input type="text" id="pe-dlcqty" placeholder="ex : 6" autocomplete="off"></div>
+    </div>
     <button class="btn btn-primary btn-full" id="btn-save-product">Enregistrer la fiche</button>
   </div>
 </div>

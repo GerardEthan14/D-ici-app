@@ -33,41 +33,13 @@ function norm(s) {
     .trim();
 }
 
-// Liste unifiée : produits du catalogue + produits ayant une DLC
-// (pour que les DLC apparaissent même si le produit n'est pas au catalogue).
+// Chaque produit porte désormais ses propres champs (dont la DLC).
 function getInfoProducts() {
-  const map = new Map();
-  const ensure = (name) => {
-    const k = norm(name);
-    if (!k) return null;
-    if (!map.has(k)) {
-      map.set(k, { name, supplier: "", barcode: "", emplacementStock: "", emplacementRayon: "", id: null });
-    }
-    return map.get(k);
-  };
-  SHARED.products.forEach((p) => {
-    const e = ensure(p.name);
-    if (!e) return;
-    e.id = p.id;
-    if (p.supplier && !e.supplier) e.supplier = p.supplier;
-    if (p.barcode && !e.barcode) e.barcode = p.barcode;
-    if (p.emplacementStock && !e.emplacementStock) e.emplacementStock = p.emplacementStock;
-    if (p.emplacementRayon && !e.emplacementRayon) e.emplacementRayon = p.emplacementRayon;
-  });
-  SHARED.dlc.forEach((d) => {
-    const e = ensure(d.name);
-    if (!e) return;
-    if (d.supplier && !e.supplier) e.supplier = d.supplier;
-  });
-  return [...map.values()];
+  return SHARED.products;
 }
 
 function dlcsForProduct(p) {
-  const nkey = norm(p.name);
-  const bc = (p.barcode || "").trim();
-  return SHARED.dlc
-    .filter((d) => (bc && (d.barcode || "").trim() === bc) || norm(d.name) === nkey)
-    .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  return p.dlc ? [{ date: p.dlc, qty: p.dlcQty || "" }] : [];
 }
 
 function dlcChip(d) {

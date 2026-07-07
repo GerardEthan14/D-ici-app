@@ -1,9 +1,9 @@
 import { $, esc, fmtD, toast } from "./utils.js";
 import { SHARED, LOCAL, app, saveLocal } from "./state.js";
-import { fbPushOrLocal, fbRemoveOrLocal, fbUpdateOrLocal } from "./firebase.js";
+import { fbSet, fbRemove, sp } from "./firebase.js";
 import { gainXP, checkBadges } from "./rpg.js";
 import { closeModal, openModal } from "./modals.js";
-import { saveProductToCatalog } from "./productCatalog.js";
+import { upsertProductDlc, clearProductDlc, normName } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 /* ── DLC status helper (used across modules) ────────── */
@@ -18,6 +18,13 @@ export function dlcStatus(d) {
   if (diff <= 7) return { label: diff + "j", cls: "dlc-critical", days: diff, zone: "critical" };
   if (diff <= 30) return { label: diff + "j", cls: "dlc-urgent", days: diff, zone: "urgent" };
   return { label: diff + "j", cls: "dlc-ok", days: diff, zone: "ok" };
+}
+
+// La DLC est désormais un champ du produit : on lit les produits ayant une DLC.
+function getDlcProducts() {
+  return SHARED.products
+    .filter((p) => p.dlc)
+    .map((p) => ({ id: p.id, name: p.name, supplier: p.supplier || "", date: p.dlc, qty: p.dlcQty || "" }));
 }
 
 /* ── Views ──────────────────────────────────────────── */
@@ -45,9 +52,8 @@ export function getDlcView() {
 
 /* ── Focus « à traiter ≤ 7 jours » ──────────────────── */
 
-// Produits dont la DLC est dépassée ou expire dans 7 jours ou moins.
 function getUrgentDlc() {
-  return SHARED.dlc.filter((d) => dlcStatus(d.date).days <= 7);
+  return getDlcProducts().filter((d) => dlcStatus(d.date).days <= 7);
 }
 
 let focusMode = false;
@@ -93,7 +99,6 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Alerte une fois par jour s'il y a des DLC à traiter sous 7 jours.
 export function checkDlcAlerts() {
   const urgent = getUrgentDlc();
   if (!urgent.length) return;
@@ -130,9 +135,8 @@ export function enableDlcReminders() {
   });
 }
 
-/* ── List render ────────────────────────────────────── */
+/* ── Rendu (schéma = produits triés par DLC) ────────── */
 
-// Vue principale = schéma (avec focus + validation). Conservé pour le bus/recherche.
 export function renderDlc() {
   renderDlcFocus();
   renderDlcSchema();
@@ -143,16 +147,16 @@ export function renderDlcSchema() {
   if (!el) return;
   const searchEl = $("dlc-search");
   const q = searchEl ? searchEl.value.trim().toLowerCase() : "";
-  let list = q
-    ? SHARED.dlc.filter(
-        (d) =>
-          (d.name || "").toLowerCase().includes(q) ||
-          (d.supplier || "").toLowerCase().includes(q)
-      )
-    : SHARED.dlc;
+  let list = getDlcProducts();
+  if (q)
+    list = list.filter(
+      (d) =>
+        (d.name || "").toLowerCase().includes(q) ||
+        (d.supplier || "").toLowerCase().includes(q)
+    );
   if (focusMode) list = list.filter((d) => dlcStatus(d.date).days <= 7);
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun résultat." : "Aucun produit enregistré."}</p></div>`;
+    el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun résultat." : "Aucun produit avec une DLC."}</p></div>`;
     return;
   }
   const sorted = [...list].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
@@ -229,7 +233,7 @@ export function renderDlcSchema() {
   el.innerHTML = html;
 }
 
-/* ── CRUD ───────────────────────────────────────────── */
+/* ── Ajout / traitement d'une DLC (sur le produit) ──── */
 
 export async function addDlc() {
   const name = $("dlc-prod").value.trim();
@@ -240,9 +244,7 @@ export async function addDlc() {
     return;
   }
   const barcode = $("dlc-barcode").value.trim();
-  await fbPushOrLocal("dlc", { name, supplier: sup, date, qty: $("dlc-qty").value.trim(), barcode });
-  // Toujours relié au catalogue (nom + code-barres) pour l'onglet Info.
-  saveProductToCatalog(name, sup, barcode);
+  upsertProductDlc(name, sup, barcode, date, $("dlc-qty").value.trim(), "");
   gainXP("dlc_add");
   ["dlc-prod", "dlc-sup", "dlc-qty", "dlc-barcode"].forEach((i) => ($(i).value = ""));
   try {
@@ -260,14 +262,14 @@ async function removeDlc(id, days) {
     gainXP("dlc_urgent");
   } else if (d <= 30) gainXP("dlc_soon");
   else gainXP("dlc_ok");
-  await fbRemoveOrLocal("dlc", id);
+  clearProductDlc(id);
   saveLocal();
   checkBadges();
   toast("✅ Produit traité !", true);
 }
 
 export function updateDlcBadge() {
-  const c = SHARED.dlc.filter((x) => dlcStatus(x.date).zone !== "ok").length;
+  const c = getDlcProducts().filter((x) => dlcStatus(x.date).zone !== "ok").length;
   const b = $("dlc-badge");
   if (!b) return;
   if (c > 0) {
@@ -276,43 +278,68 @@ export function updateDlcBadge() {
   } else b.style.display = "none";
 }
 
-/* ── Edit ───────────────────────────────────────────── */
+/* ── Edit (modifie la DLC du produit) ───────────────── */
 
 export function openEditDlc(id) {
-  const v = SHARED.dlc.find((x) => x.id === id);
-  if (!v) return;
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
   $("edit-dlc-id").value = id;
-  $("edit-dlc-name").value = v.name || "";
-  $("edit-dlc-sup").value = v.supplier || "";
-  $("edit-dlc-date").value = v.date || "";
-  $("edit-dlc-qty").value = v.qty || "";
-  $("edit-dlc-barcode").value = v.barcode || "";
+  $("edit-dlc-name").value = p.name || "";
+  $("edit-dlc-sup").value = p.supplier || "";
+  $("edit-dlc-date").value = p.dlc || "";
+  $("edit-dlc-qty").value = p.dlcQty || "";
+  $("edit-dlc-barcode").value = p.barcode || "";
   openModal("modal-edit-dlc");
 }
 
 export async function saveEditDlc() {
   const id = $("edit-dlc-id").value;
-  const v = SHARED.dlc.find((x) => x.id === id);
-  if (!v) return;
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
   const name = $("edit-dlc-name").value.trim();
   const date = $("edit-dlc-date").value;
   if (!name || !date) {
     toast("⚠️ Nom et date requis");
     return;
   }
-  const barcode = $("edit-dlc-barcode").value.trim();
-  const updated = {
-    ...v,
+  await fbSet(`products/${id}`, {
+    ...p,
     name,
     supplier: $("edit-dlc-sup").value.trim(),
-    date,
-    qty: $("edit-dlc-qty").value.trim(),
-    barcode,
-  };
-  await fbUpdateOrLocal("dlc", id, updated);
-  saveProductToCatalog(name, updated.supplier, barcode);
+    barcode: $("edit-dlc-barcode").value.trim(),
+    dlc: date,
+    dlcQty: $("edit-dlc-qty").value.trim(),
+  });
   closeModal("modal-edit-dlc");
   toast("✅ DLC modifiée");
+}
+
+/* ── Migration : anciennes entrées DLC -> champ du produit ── */
+
+let migrating = false;
+export async function migrateLegacyDlc() {
+  if (migrating || !app.firebaseMode) return;
+  const legacy = [...SHARED.dlc];
+  if (!legacy.length) return;
+  migrating = true;
+  try {
+    // Regroupe par produit (code-barres, sinon nom normalisé), garde la DLC la plus proche.
+    const groups = new Map();
+    legacy.forEach((d) => {
+      if (!d.name || !d.date) return;
+      const key = (d.barcode || "").trim() || normName(d.name);
+      const g = groups.get(key) || { name: d.name, supplier: d.supplier || "", barcode: (d.barcode || "").trim(), date: d.date, qty: d.qty || "" };
+      if (d.date < g.date) g.date = d.date;
+      if (!g.supplier && d.supplier) g.supplier = d.supplier;
+      if (!g.barcode && d.barcode) g.barcode = (d.barcode || "").trim();
+      groups.set(key, g);
+    });
+    groups.forEach((g) => upsertProductDlc(g.name, g.supplier, g.barcode, g.date, g.qty, ""));
+    // Supprime les anciennes entrées DLC (désormais dans les produits).
+    for (const d of legacy) await fbRemove(sp("dlc/" + d.id));
+  } finally {
+    migrating = false;
+  }
 }
 
 /* ── Bindings ───────────────────────────────────────── */
@@ -342,3 +369,4 @@ render.dlc = () => {
   updateDlcBadge();
   checkDlcAlerts();
 };
+render.migrateDlc = migrateLegacyDlc;

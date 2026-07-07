@@ -47,6 +47,60 @@ export function findProductByBarcode(barcode) {
   return p ? p.name : "";
 }
 
+// Normalise un nom pour comparer (accents/casse/ponctuation/espaces ignorés).
+export function normName(s) {
+  return (s || "")
+    .toString()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+// Retrouve un produit par code-barres (exact) puis par nom normalisé.
+export function findProduct(name, barcode) {
+  const bc = (barcode || "").trim();
+  if (bc) {
+    const byBc = SHARED.products.find((p) => (p.barcode || "").trim() === bc);
+    if (byBc) return byBc;
+  }
+  const nk = normName(name);
+  return SHARED.products.find((p) => normName(p.name) === nk) || null;
+}
+
+// Crée/met à jour un produit avec sa DLC (garde la date la plus proche).
+export function upsertProductDlc(name, supplier, barcode, date, qty, emplacement) {
+  if (!name || !app.firebaseMode) return;
+  const p = findProduct(name, barcode);
+  if (p) {
+    const patch = {};
+    if (supplier && !p.supplier) patch.supplier = supplier;
+    if (barcode && !p.barcode) patch.barcode = barcode;
+    if (emplacement && !p.emplacementStock) patch.emplacementStock = emplacement;
+    if (date && (!p.dlc || date < p.dlc)) patch.dlc = date;
+    if (qty) patch.dlcQty = qty;
+    if (Object.keys(patch).length) fbSet(`products/${p.id}`, { ...p, ...patch });
+  } else {
+    fbPush("products", {
+      name,
+      supplier: supplier || "",
+      barcode: barcode || "",
+      emplacementStock: emplacement || "",
+      emplacementRayon: "",
+      dlc: date || "",
+      dlcQty: qty || "",
+    });
+  }
+}
+
+// Efface la DLC d'un produit (produit "traité").
+export function clearProductDlc(id) {
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
+  fbSet(`products/${id}`, { ...p, dlc: "", dlcQty: "" });
+}
+
 export function showProductSuggestions(inputId, dropId, context) {
   const q = $(inputId).value.trim().toLowerCase();
   const drop = $(dropId);
