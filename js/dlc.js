@@ -239,10 +239,12 @@ export async function addDlc() {
     toast("⚠️ Nom et date requis");
     return;
   }
-  await fbPushOrLocal("dlc", { name, supplier: sup, date, qty: $("dlc-qty").value.trim() });
-  if ($("dlc-save-product").checked) saveProductToCatalog(name, sup);
+  const barcode = $("dlc-barcode").value.trim();
+  await fbPushOrLocal("dlc", { name, supplier: sup, date, qty: $("dlc-qty").value.trim(), barcode });
+  // Toujours relié au catalogue (nom + code-barres) pour l'onglet Info.
+  saveProductToCatalog(name, sup, barcode);
   gainXP("dlc_add");
-  ["dlc-prod", "dlc-sup", "dlc-qty"].forEach((i) => ($(i).value = ""));
+  ["dlc-prod", "dlc-sup", "dlc-qty", "dlc-barcode"].forEach((i) => ($(i).value = ""));
   try {
     $("dlc-date").valueAsDate = new Date();
   } catch {}
@@ -284,6 +286,7 @@ export function openEditDlc(id) {
   $("edit-dlc-sup").value = v.supplier || "";
   $("edit-dlc-date").value = v.date || "";
   $("edit-dlc-qty").value = v.qty || "";
+  $("edit-dlc-barcode").value = v.barcode || "";
   openModal("modal-edit-dlc");
 }
 
@@ -297,14 +300,17 @@ export async function saveEditDlc() {
     toast("⚠️ Nom et date requis");
     return;
   }
+  const barcode = $("edit-dlc-barcode").value.trim();
   const updated = {
     ...v,
     name,
     supplier: $("edit-dlc-sup").value.trim(),
     date,
     qty: $("edit-dlc-qty").value.trim(),
+    barcode,
   };
   await fbUpdateOrLocal("dlc", id, updated);
+  saveProductToCatalog(name, updated.supplier, barcode);
   closeModal("modal-edit-dlc");
   toast("✅ DLC modifiée");
 }

@@ -22,12 +22,23 @@ export function switchInfoView(v) {
 
 /* ── Vue Produit ────────────────────────────────────── */
 
+// Normalise un nom pour comparer : sans accents, casse, ponctuation, espaces.
+function norm(s) {
+  return (s || "")
+    .toString()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 // Liste unifiée : produits du catalogue + produits ayant une DLC
 // (pour que les DLC apparaissent même si le produit n'est pas au catalogue).
 function getInfoProducts() {
   const map = new Map();
   const ensure = (name) => {
-    const k = (name || "").trim().toLowerCase();
+    const k = norm(name);
     if (!k) return null;
     if (!map.has(k)) {
       map.set(k, { name, supplier: "", barcode: "", emplacementStock: "", emplacementRayon: "", id: null });
@@ -52,9 +63,10 @@ function getInfoProducts() {
 }
 
 function dlcsForProduct(p) {
-  const key = (p.name || "").toLowerCase();
+  const nkey = norm(p.name);
+  const bc = (p.barcode || "").trim();
   return SHARED.dlc
-    .filter((d) => (d.name || "").toLowerCase() === key)
+    .filter((d) => (bc && (d.barcode || "").trim() === bc) || norm(d.name) === nkey)
     .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
 }
 
