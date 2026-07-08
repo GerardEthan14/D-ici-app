@@ -3,7 +3,7 @@ import { SHARED, LOCAL, app, saveLocal } from "./state.js";
 import { fbSet, fbRemove, sp } from "./firebase.js";
 import { gainXP, checkBadges } from "./rpg.js";
 import { closeModal, openModal } from "./modals.js";
-import { upsertProductDlc, clearProductDlc, normName } from "./productCatalog.js";
+import { upsertProductDlc, removeProductDlc, productDlcs, normName } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 /* ── DLC status helper (used across modules) ────────── */
@@ -20,11 +20,15 @@ export function dlcStatus(d) {
   return { label: diff + "j", cls: "dlc-ok", days: diff, zone: "ok" };
 }
 
-// La DLC est désormais un champ du produit : on lit les produits ayant une DLC.
+// Chaque DLC d'un produit devient une ligne (un produit peut en avoir plusieurs).
 function getDlcProducts() {
-  return SHARED.products
-    .filter((p) => p.dlc)
-    .map((p) => ({ id: p.id, name: p.name, supplier: p.supplier || "", date: p.dlc, qty: p.dlcQty || "" }));
+  const rows = [];
+  SHARED.products.forEach((p) => {
+    productDlcs(p).forEach((d) => {
+      rows.push({ id: p.id, name: p.name, supplier: p.supplier || "", date: d.date, qty: d.qty || "" });
+    });
+  });
+  return rows;
 }
 
 /* ── Views ──────────────────────────────────────────── */
@@ -219,7 +223,7 @@ export function renderDlcSchema() {
       .map((v) => {
         const s = dlcStatus(v.date);
         return `<div class="schema-zone-row">
-          <button class="dlc-check dlc-check-sm" data-action="remove-dlc" data-id="${esc(v.id)}" data-days="${s.days}" title="Valider (traiter)">
+          <button class="dlc-check dlc-check-sm" data-action="remove-dlc" data-id="${esc(v.id)}" data-date="${esc(v.date)}" data-days="${s.days}" title="Valider (traiter)">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
           <div class="schema-zone-name">${esc(v.name)}${v.qty ? ` <span class="schema-zone-qty">~${esc(v.qty)}</span>` : ""}</div>
@@ -254,7 +258,7 @@ export async function addDlc() {
   toast("📅 DLC enregistrée +10 XP", true);
 }
 
-async function removeDlc(id, days) {
+async function removeDlc(id, date, days) {
   LOCAL.rpg.dlcTreated = (LOCAL.rpg.dlcTreated || 0) + 1;
   const d = parseInt(days);
   if (d < 0 || d <= 7) {
@@ -262,7 +266,7 @@ async function removeDlc(id, days) {
     gainXP("dlc_urgent");
   } else if (d <= 30) gainXP("dlc_soon");
   else gainXP("dlc_ok");
-  clearProductDlc(id);
+  removeProductDlc(id, date);
   saveLocal();
   checkBadges();
   toast("✅ Produit traité !", true);
@@ -349,9 +353,9 @@ export function bindDlcEvents() {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
     if (btn.dataset.action === "remove-dlc") {
-      removeDlc(btn.dataset.id, parseInt(btn.dataset.days));
+      removeDlc(btn.dataset.id, btn.dataset.date, parseInt(btn.dataset.days));
     } else if (btn.dataset.action === "edit-dlc") {
-      openEditDlc(btn.dataset.id);
+      render.openFiche?.(btn.dataset.id);
     }
   });
   $("dlc-focus")?.addEventListener("click", (e) => {

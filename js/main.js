@@ -54,6 +54,7 @@ import {
   adminDeleteProfile,
   renderStoreSwitcher,
   saveProductSheet,
+  bindProductSheetEvents,
 } from "./profil.js";
 import { loginWithGoogle, logout, showLogin, hideLogin } from "./login.js";
 import {
@@ -173,6 +174,7 @@ function bindAll() {
   bindClick("btn-admin-save", adminSaveProfile);
   bindClick("btn-admin-delete", adminDeleteProfile);
   bindClick("btn-save-product", saveProductSheet);
+  bindProductSheetEvents();
   bindClick("btn-toggle-map", toggleMap);
   bindClick("btn-save-zone", saveZone);
   bindClick("btn-reset-zone", resetZone);
