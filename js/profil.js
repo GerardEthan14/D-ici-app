@@ -2,7 +2,7 @@ import { $, esc, toast } from "./utils.js";
 import { SHARED, app, isAdmin } from "./state.js";
 import { fbSet, fbRemove, sp, loadAllUsers, saveUserStore, setUserRole } from "./firebase.js";
 import { getLevel } from "./rpg.js";
-import { ADMIN_EMAIL, STORES, ROLE_LABELS } from "./config.js";
+import { ADMIN_EMAIL, STORES, ROLE_LABELS, CATEGORIES } from "./config.js";
 import { closeModal, openModal } from "./modals.js";
 import { getZoneConfig, getZoneData } from "./reserve.js";
 import { render } from "./bus.js";
@@ -300,8 +300,15 @@ export function openProductSheet(id) {
   const p = SHARED.products.find((x) => x.id === id);
   if (!p) return;
   fillProdDatalists();
+  const catSel = $("pe-category");
+  if (catSel) {
+    catSel.innerHTML = ['<option value="">— Catégorie —</option>']
+      .concat(CATEGORIES.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`))
+      .join("");
+  }
   $("pe-id").value = id;
   $("pe-name").value = p.name || "";
+  $("pe-category").value = p.category || "";
   $("pe-sup").value = p.supplier || "";
   $("pe-barcode").value = p.barcode || "";
   $("pe-stock").value = p.emplacementStock || "";
@@ -322,6 +329,7 @@ export function saveProductSheet() {
   fbSet("products/" + id, {
     ...p,
     name,
+    category: $("pe-category").value,
     supplier: $("pe-sup").value.trim(),
     barcode: $("pe-barcode").value.trim(),
     emplacementStock: $("pe-stock").value.trim(),

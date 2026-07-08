@@ -1237,3 +1237,6 @@
 }
 .info-dlc-row { display: flex; align-items: center; gap: 6px; }
 .info-dlc-qty { font-size: 0.72rem; color: var(--ink3); }
+
+/* Pastille catégorie (Info) */
+.info-cat-chip { background: rgba(43,108,176,0.12); color: var(--blue, #2b6cb0); font-weight: 600; }
