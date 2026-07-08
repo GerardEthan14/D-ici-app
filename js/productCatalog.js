@@ -69,18 +69,36 @@ export function findProduct(name, barcode) {
   return SHARED.products.find((p) => normName(p.name) === nk) || null;
 }
 
-// Crée/met à jour un produit avec sa DLC (garde la date la plus proche).
+// DLC d'un produit sous forme de tableau [{date, qty}] (compat champ unique).
+export function productDlcs(p) {
+  if (Array.isArray(p.dlcs)) return p.dlcs.filter((d) => d && d.date);
+  if (p.dlc) return [{ date: p.dlc, qty: p.dlcQty || "" }];
+  return [];
+}
+
+// Écrit les DLC (tableau) et nettoie l'ancien champ unique.
+function writeProductDlcs(p, dlcs, extraPatch = {}) {
+  dlcs = dlcs
+    .filter((d) => d && d.date)
+    .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const clean = { ...p, ...extraPatch, dlcs };
+  delete clean.dlc;
+  delete clean.dlcQty;
+  fbSet(`products/${p.id}`, clean);
+}
+
+// Crée/met à jour un produit en AJOUTANT une DLC (plusieurs possibles).
 export function upsertProductDlc(name, supplier, barcode, date, qty, emplacement) {
   if (!name || !app.firebaseMode) return;
   const p = findProduct(name, barcode);
   if (p) {
-    const patch = {};
-    if (supplier && !p.supplier) patch.supplier = supplier;
-    if (barcode && !p.barcode) patch.barcode = barcode;
-    if (emplacement && !p.emplacementStock) patch.emplacementStock = emplacement;
-    if (date && (!p.dlc || date < p.dlc)) patch.dlc = date;
-    if (qty) patch.dlcQty = qty;
-    if (Object.keys(patch).length) fbSet(`products/${p.id}`, { ...p, ...patch });
+    const dlcs = productDlcs(p);
+    if (!dlcs.some((d) => d.date === date)) dlcs.push({ date, qty: qty || "" });
+    const extra = {};
+    if (supplier && !p.supplier) extra.supplier = supplier;
+    if (barcode && !p.barcode) extra.barcode = barcode;
+    if (emplacement && !p.emplacementStock) extra.emplacementStock = emplacement;
+    writeProductDlcs(p, dlcs, extra);
   } else {
     fbPush("products", {
       name,
@@ -88,17 +106,24 @@ export function upsertProductDlc(name, supplier, barcode, date, qty, emplacement
       barcode: barcode || "",
       emplacementStock: emplacement || "",
       emplacementRayon: "",
-      dlc: date || "",
-      dlcQty: qty || "",
+      category: "",
+      dlcs: [{ date, qty: qty || "" }],
     });
   }
 }
 
-// Efface la DLC d'un produit (produit "traité").
-export function clearProductDlc(id) {
+// Enlève UNE DLC (date précise) d'un produit — produit "traité" pour ce lot.
+export function removeProductDlc(id, date) {
   const p = SHARED.products.find((x) => x.id === id);
   if (!p) return;
-  fbSet(`products/${id}`, { ...p, dlc: "", dlcQty: "" });
+  writeProductDlcs(p, productDlcs(p).filter((d) => d.date !== date));
+}
+
+// Remplace toutes les DLC d'un produit (utilisé par la fiche produit).
+export function setProductDlcs(id, dlcs) {
+  const p = SHARED.products.find((x) => x.id === id);
+  if (!p) return;
+  writeProductDlcs(p, dlcs);
 }
 
 export function showProductSuggestions(inputId, dropId, context) {

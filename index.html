@@ -534,9 +534,9 @@
     <div class="field"><label>Fournisseur</label><input type="text" id="pe-sup" autocomplete="off"></div>
     <div class="field"><label>Code-barres</label><input type="text" id="pe-barcode" autocomplete="off" inputmode="numeric"></div>
     <div class="field"><label>🏠 Emplacement (réserve)</label><input type="text" id="pe-stock" list="prod-stock-list" placeholder="ex : A1, K2…" autocomplete="off"></div>
-    <div class="ic-qty-row">
-      <div class="field"><label>📅 DLC</label><input type="date" id="pe-dlc"></div>
-      <div class="field"><label>Quantité DLC</label><input type="text" id="pe-dlcqty" placeholder="ex : 6" autocomplete="off"></div>
+    <div class="field"><label>📅 DLC (une ou plusieurs)</label>
+      <div id="pe-dlc-list"></div>
+      <button type="button" class="btn btn-ghost btn-sm" id="pe-add-dlc">+ Ajouter une DLC</button>
     </div>
     <button class="btn btn-primary btn-full" id="btn-save-product">Enregistrer la fiche</button>
   </div>

@@ -5,6 +5,7 @@ import { getLevel } from "./rpg.js";
 import { ADMIN_EMAIL, STORES, ROLE_LABELS, CATEGORIES } from "./config.js";
 import { closeModal, openModal } from "./modals.js";
 import { getZoneConfig, getZoneData } from "./reserve.js";
+import { productDlcs } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 /* ── Helpers ────────────────────────────────────────── */
@@ -296,6 +297,20 @@ function fillProdDatalists() {
   }
 }
 
+function dlcRowHtml(date, qty) {
+  return `<div class="pe-dlc-row">
+    <input type="date" class="pe-dlc-date" value="${esc(date || "")}">
+    <input type="text" class="pe-dlc-qty" placeholder="Qté" value="${esc(qty || "")}">
+    <button type="button" class="pe-dlc-del icon-btn danger icon-sm" title="Retirer">✕</button>
+  </div>`;
+}
+
+function renderPeDlcRows(dlcs) {
+  const el = $("pe-dlc-list");
+  if (!el) return;
+  el.innerHTML = dlcs.length ? dlcs.map((d) => dlcRowHtml(d.date, d.qty)).join("") : "";
+}
+
 export function openProductSheet(id) {
   const p = SHARED.products.find((x) => x.id === id);
   if (!p) return;
@@ -312,8 +327,7 @@ export function openProductSheet(id) {
   $("pe-sup").value = p.supplier || "";
   $("pe-barcode").value = p.barcode || "";
   $("pe-stock").value = p.emplacementStock || "";
-  $("pe-dlc").value = p.dlc || "";
-  $("pe-dlcqty").value = p.dlcQty || "";
+  renderPeDlcRows(productDlcs(p));
   openModal("modal-edit-product");
 }
 
@@ -326,18 +340,36 @@ export function saveProductSheet() {
     toast("⚠️ Nom requis");
     return;
   }
-  fbSet("products/" + id, {
+  const dlcs = [...document.querySelectorAll("#pe-dlc-list .pe-dlc-row")]
+    .map((row) => ({
+      date: row.querySelector(".pe-dlc-date")?.value || "",
+      qty: (row.querySelector(".pe-dlc-qty")?.value || "").trim(),
+    }))
+    .filter((d) => d.date);
+  const clean = {
     ...p,
     name,
     category: $("pe-category").value,
     supplier: $("pe-sup").value.trim(),
     barcode: $("pe-barcode").value.trim(),
     emplacementStock: $("pe-stock").value.trim(),
-    dlc: $("pe-dlc").value,
-    dlcQty: $("pe-dlcqty").value.trim(),
-  });
+    dlcs,
+  };
+  delete clean.dlc;
+  delete clean.dlcQty;
+  fbSet("products/" + id, clean);
   closeModal("modal-edit-product");
   toast("✅ Fiche produit enregistrée");
+}
+
+export function bindProductSheetEvents() {
+  $("pe-add-dlc")?.addEventListener("click", () => {
+    $("pe-dlc-list")?.insertAdjacentHTML("beforeend", dlcRowHtml("", ""));
+  });
+  $("pe-dlc-list")?.addEventListener("click", (e) => {
+    const del = e.target.closest(".pe-dlc-del");
+    if (del) del.closest(".pe-dlc-row")?.remove();
+  });
 }
 
 export function bindAdminEvents() {
@@ -366,3 +398,4 @@ render.scores = () => {
   if (app.email === ADMIN_EMAIL) renderAdminPanel();
 };
 render.products = renderAdminProducts;
+render.openFiche = openProductSheet;

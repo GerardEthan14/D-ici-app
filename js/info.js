@@ -2,6 +2,7 @@ import { $, esc, fmtD, toast } from "./utils.js";
 import { SHARED } from "./state.js";
 import { CATEGORIES } from "./config.js";
 import { dlcStatus } from "./dlc.js";
+import { productDlcs } from "./productCatalog.js";
 import { openProductSheet } from "./profil.js";
 import { openEditSupplier } from "./fournisseurs.js";
 import { render } from "./bus.js";
@@ -40,7 +41,7 @@ function getInfoProducts() {
 }
 
 function dlcsForProduct(p) {
-  return p.dlc ? [{ date: p.dlc, qty: p.dlcQty || "" }] : [];
+  return [...productDlcs(p)].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
 }
 
 function dlcChip(d) {
