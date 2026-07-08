@@ -1,5 +1,6 @@
 import { $, esc, fmtD, toast } from "./utils.js";
 import { SHARED } from "./state.js";
+import { CATEGORIES } from "./config.js";
 import { dlcStatus } from "./dlc.js";
 import { openProductSheet } from "./profil.js";
 import { openEditSupplier } from "./fournisseurs.js";
@@ -72,9 +73,9 @@ function infoProductCard(p) {
       <div class="info-card-main" data-action="open-prod" data-id="${p.id ? esc(p.id) : ""}">
         <div class="info-card-name">${esc(p.name)}</div>
         <div class="info-card-meta">
+          ${p.category ? `<span class="info-chip info-cat-chip">${esc(p.category)}</span>` : ""}
           ${p.supplier ? `<button type="button" class="info-chip info-sup-link" data-action="open-sup" data-sup="${esc(p.supplier)}">🏭 ${esc(p.supplier)}</button>` : ""}
           ${p.emplacementStock ? `<span class="info-chip">🏠 ${esc(p.emplacementStock)}</span>` : ""}
-          ${p.emplacementRayon ? `<span class="info-chip">🗂️ ${esc(p.emplacementRayon)}</span>` : ""}
           ${p.barcode ? `<span class="info-chip">🔖 ${esc(p.barcode)}</span>` : ""}
         </div>
       </div>
@@ -84,19 +85,30 @@ function infoProductCard(p) {
   </div>`;
 }
 
+function fillCatFilter() {
+  const sel = $("info-cat-filter");
+  if (!sel || sel.options.length) return;
+  sel.innerHTML = ['<option value="">Toutes les catégories</option>']
+    .concat(CATEGORIES.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`))
+    .join("");
+}
+
 export function renderInfoProducts() {
   const el = $("info-prod-list");
   if (!el) return;
+  fillCatFilter();
   const q = ($("info-prod-search")?.value || "").trim().toLowerCase();
+  const cat = $("info-cat-filter")?.value || "";
   let list = getInfoProducts();
+  if (cat) list = list.filter((p) => (p.category || "") === cat);
   if (q)
     list = list.filter(
       (p) =>
         (p.name || "").toLowerCase().includes(q) ||
         (p.supplier || "").toLowerCase().includes(q) ||
         (p.barcode || "").includes(q) ||
-        (p.emplacementStock || "").toLowerCase().includes(q) ||
-        (p.emplacementRayon || "").toLowerCase().includes(q)
+        (p.category || "").toLowerCase().includes(q) ||
+        (p.emplacementStock || "").toLowerCase().includes(q)
     );
   list = [...list].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   if (!list.length) {
@@ -116,6 +128,7 @@ function openSupplierByName(name) {
 
 export function bindInfoEvents() {
   $("info-prod-search")?.addEventListener("input", renderInfoProducts);
+  $("info-cat-filter")?.addEventListener("change", renderInfoProducts);
   $("info-prod-list")?.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;

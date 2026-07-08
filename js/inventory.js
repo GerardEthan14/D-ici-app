@@ -10,7 +10,7 @@ import {
 } from "./firebase.js";
 import { closeModal, openModal } from "./modals.js";
 import { getZoneConfig, getZoneData } from "./reserve.js";
-import { saveProductToCatalog } from "./productCatalog.js";
+import { saveProductToCatalog, findProduct } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 const UNITS = ["pièce", "caisse", "colis", "kg", "palette"];
@@ -421,25 +421,42 @@ function makeBarcodeDataUrl(JsBarcode, code) {
   }
 }
 
-// Ouvre le dialogue de choix des emplacements à imprimer.
-export function openPrintDialog() {
+// Clé de regroupement d'une ligne : emplacement OU catégorie (via le produit).
+function countGroupKey(c, groupby) {
+  if (groupby === "category") {
+    const p = findProduct(c.name, c.barcode);
+    return p && p.category ? p.category : "Sans catégorie";
+  }
+  return c.location || "Sans emplacement";
+}
+
+function buildPrintGroups(groupby, filter) {
   const groups = {};
   SHARED.invCounts.forEach((c) => {
-    const loc = c.location || "Sans emplacement";
-    (groups[loc] ||= []).push(c);
+    const k = countGroupKey(c, groupby);
+    if (filter && !filter.has(k)) return;
+    (groups[k] ||= []).push(c);
   });
-  const locs = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  return groups;
+}
+
+// Ouvre le dialogue de choix des sections à imprimer (emplacement ou catégorie).
+export function openPrintDialog() {
+  const groupby = $("print-groupby")?.value || "location";
+  const groups = buildPrintGroups(groupby, null);
+  const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
   const el = $("print-loc-list");
   if (!el) return;
-  if (!locs.length) {
+  const icon = groupby === "category" ? "🏷️" : "📍";
+  if (!keys.length) {
     el.innerHTML = `<div class="empty-state"><p>Aucun comptage à imprimer.</p></div>`;
   } else {
-    el.innerHTML = locs
+    el.innerHTML = keys
       .map(
-        (l) => `<label class="print-loc-row">
-          <input type="checkbox" class="print-loc-cb" value="${esc(l)}" checked>
-          <span>📍 ${esc(l)}</span>
-          <span class="print-loc-n">${groups[l].length}</span>
+        (k) => `<label class="print-loc-row">
+          <input type="checkbox" class="print-loc-cb" value="${esc(k)}" checked>
+          <span>${icon} ${esc(k)}</span>
+          <span class="print-loc-n">${groups[k].length}</span>
         </label>`
       )
       .join("");
@@ -455,18 +472,20 @@ export function togglePrintAll() {
 }
 
 export function confirmPrint() {
+  const groupby = $("print-groupby")?.value || "location";
   const selected = [...document.querySelectorAll(".print-loc-cb")]
     .filter((cb) => cb.checked)
     .map((cb) => cb.value);
   if (!selected.length) {
-    toast("⚠️ Choisis au moins un emplacement");
+    toast("⚠️ Choisis au moins une section");
     return;
   }
   closeModal("modal-print-inv");
-  printInventory(selected);
+  printInventory(selected, groupby);
 }
 
-export async function printInventory(locsFilter) {
+export async function printInventory(selectedKeys, groupby) {
+  groupby = groupby || "location";
   let JsBarcode = null;
   try {
     const mod = await import("https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/+esm");
@@ -475,17 +494,12 @@ export async function printInventory(locsFilter) {
     toast("⚠️ Codes-barres indisponibles, impression en texte");
   }
 
-  const filter = Array.isArray(locsFilter) && locsFilter.length ? new Set(locsFilter) : null;
-  const groups = {};
-  SHARED.invCounts.forEach((c) => {
-    const loc = c.location || "Sans emplacement";
-    if (filter && !filter.has(loc)) return;
-    (groups[loc] ||= []).push(c);
-  });
-  const locs = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  const filter = Array.isArray(selectedKeys) && selectedKeys.length ? new Set(selectedKeys) : null;
+  const groups = buildPrintGroups(groupby, filter);
+  const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
   let body = `<h1>Inventaire — ${new Date().toLocaleDateString("fr-FR")}</h1>`;
-  locs.forEach((loc) => {
+  keys.forEach((loc) => {
     body += `<h2>${esc(loc)}</h2>`;
     groups[loc].forEach((c) => {
       const img = c.barcode && JsBarcode ? makeBarcodeDataUrl(JsBarcode, c.barcode) : null;

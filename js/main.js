@@ -76,6 +76,7 @@ import {
   addCount,
   saveEditCount,
   generateLabel,
+  openPrintDialog,
   confirmPrint,
   togglePrintAll,
   bindInventoryEvents,
@@ -156,6 +157,7 @@ function bindAll() {
   bindClick("btn-print-confirm", confirmPrint);
   const printAll = $("print-all");
   if (printAll) printAll.addEventListener("change", togglePrintAll);
+  $("print-groupby")?.addEventListener("change", openPrintDialog);
   bindClick("btn-add-reserve", addReserve);
   bindClick("btn-add-team-todo", addTeamTodo);
   bindClick("btn-add-vrac", addVrac);

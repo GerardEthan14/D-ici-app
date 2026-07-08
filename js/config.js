@@ -110,3 +110,14 @@ export const STORAGE_KEYS = {
   local: "dici-local-v3",
   username: "dici-username",
 };
+
+export const CATEGORIES = [
+  "Boisson alcoolisée",
+  "Boisson non-alcoolisée",
+  "Alcool",
+  "Bière",
+  "Vin",
+  "Épicerie sucrée",
+  "Épicerie salée",
+  "Non food",
+];
