@@ -1,6 +1,8 @@
 import { $, esc, toast } from "./utils.js";
+import { SHARED } from "./state.js";
 import { CATEGORIES } from "./config.js";
-import { importProduct } from "./productCatalog.js";
+import { importProduct, normName, productDlcs } from "./productCatalog.js";
+import { fbSet, fbRemove } from "./firebase.js";
 import { openModal } from "./modals.js";
 import { render } from "./bus.js";
 
@@ -154,9 +156,88 @@ async function runImport() {
   toast(`✅ Import : ${create} créés, ${update} MAJ`, true);
 }
 
+/* ── Déduplication des produits ─────────────────────── */
+
+const FIELDS = ["name", "barcode", "supplier", "category", "emplacementStock", "emplacementRayon"];
+
+function infoScore(p) {
+  return FIELDS.filter((k) => String(p[k] ?? "").trim()).length + productDlcs(p).length;
+}
+
+// Regroupe les doublons (même code-barres, sinon même nom normalisé),
+// fusionne toutes les infos dans la fiche la plus complète, supprime les autres.
+async function dedupeProducts() {
+  const groups = new Map();
+  SHARED.products.forEach((p) => {
+    const bc = (p.barcode || "").trim();
+    const key = bc ? "bc:" + bc : "nm:" + normName(p.name);
+    if (key === "bc:" && !bc) return;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  });
+
+  let removed = 0;
+  let mergedGroups = 0;
+  for (const arr of groups.values()) {
+    if (arr.length < 2) continue;
+    arr.sort((a, b) => infoScore(b) - infoScore(a));
+    const keep = arr[0];
+    const merged = { ...keep };
+    // Complète les champs manquants depuis les autres doublons.
+    FIELDS.forEach((k) => {
+      if (!String(merged[k] ?? "").trim()) {
+        const src = arr.find((p) => String(p[k] ?? "").trim());
+        if (src) merged[k] = src[k];
+      }
+    });
+    // Union des DLC.
+    const dlcMap = new Map();
+    arr.forEach((p) => productDlcs(p).forEach((d) => { if (d.date && !dlcMap.has(d.date)) dlcMap.set(d.date, d); }));
+    merged.dlcs = [...dlcMap.values()].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+    delete merged.dlc;
+    delete merged.dlcQty;
+    await fbSet(`products/${keep.id}`, merged);
+    for (const p of arr.slice(1)) {
+      await fbRemove(`products/${p.id}`);
+      removed++;
+    }
+    mergedGroups++;
+  }
+  return { removed, mergedGroups };
+}
+
+async function runDedupe() {
+  const btn = $("btn-dedupe");
+  // Compte d'abord les doublons pour informer.
+  const seen = new Map();
+  let dupCount = 0;
+  SHARED.products.forEach((p) => {
+    const bc = (p.barcode || "").trim();
+    const key = bc ? "bc:" + bc : "nm:" + normName(p.name);
+    seen.set(key, (seen.get(key) || 0) + 1);
+  });
+  seen.forEach((n) => { if (n > 1) dupCount += n - 1; });
+  if (!dupCount) {
+    toast("✅ Aucun doublon trouvé");
+    return;
+  }
+  if (!confirm(`Fusionner et supprimer ${dupCount} doublon(s) ? Les infos (emplacement, DLC…) sont conservées dans la fiche gardée.`)) return;
+  if (btn) btn.disabled = true;
+  try {
+    const { removed, mergedGroups } = await dedupeProducts();
+    toast(`🧹 ${removed} doublon(s) supprimé(s) sur ${mergedGroups} produit(s)`, true);
+    render.infoProducts?.();
+  } catch (e) {
+    toast("⚠️ Erreur pendant la déduplication");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 export function bindImportEvents() {
   $("imp-file")?.addEventListener("change", onImportFile);
   $("imp-col-cat")?.addEventListener("change", renderCatMap);
   $("btn-import-open")?.addEventListener("click", openImport);
   $("imp-run")?.addEventListener("click", runImport);
+  $("btn-dedupe")?.addEventListener("click", runDedupe);
 }
