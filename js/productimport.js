@@ -12,12 +12,13 @@ let headers = [];
 // Devine la catégorie (parmi les 8) à partir du libellé de famille.
 const CAT_GUESS = [
   [/bi[eè]re|pils|\bipa\b|triple|blonde|brune|abbaye/i, "Bière"],
-  [/\bvin|rouge|blanc|ros[ée]|champagne|cr[ée]mant|mousseux/i, "Vin"],
-  [/spiritueux|alcool|whisky|rhum|vodka|\bgin\b|ap[ée]ritif|liqueur|digestif|p[ée]ket/i, "Alcool"],
-  [/soft|\bjus\b|\beau\b|soda|limonade|sirop|sans.?alcool|nectar|boisson.?non/i, "Boisson non-alcoolisée"],
+  [/\bvin\b|rouge|blanc|ros[ée]|champagne|cr[ée]mant|mousseux/i, "Vin"],
+  [/vrac/i, "Vrac"],
+  [/non.?alcool|boisson.?non|soft|\bjus\b|\beau\b|soda|limonade|sirop|nectar/i, "Boisson non-alcoolisée"],
+  [/boisson.?alcool|alcool.?autre|spiritueux|whisky|rhum|vodka|\bgin\b|ap[ée]ritif|liqueur|digestif|p[ée]ket|alcool/i, "Boisson alcoolisée"],
   [/sucr|biscuit|chocolat|confiserie|bonbon|c[ée]r[ée]ale|p[aâ]tisserie|goûter/i, "Épicerie sucrée"],
   [/sal|chips|conserve|sauce|p[aâ]tes|\briz\b|ap[ée]ro|snack|\bsel\b/i, "Épicerie salée"],
-  [/non.?food|droguerie|hygi|entretien|papeterie|m[ée]nage|animal/i, "Non food"],
+  [/dph|non.?aliment|non.?food|droguerie|hygi|entretien|parfum|papeterie|m[ée]nage|animal/i, "DPH & Non alimentaire"],
 ];
 
 function guessCat(famille) {

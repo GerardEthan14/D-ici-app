@@ -112,12 +112,12 @@ export const STORAGE_KEYS = {
 };
 
 export const CATEGORIES = [
-  "Boisson alcoolisée",
-  "Boisson non-alcoolisée",
-  "Alcool",
   "Bière",
   "Vin",
+  "Boisson alcoolisée",
+  "Boisson non-alcoolisée",
+  "Vrac",
   "Épicerie sucrée",
   "Épicerie salée",
-  "Non food",
+  "DPH & Non alimentaire",
 ];
