@@ -195,6 +195,7 @@
           Scanner pour trouver un produit
         </button>
         <div class="field"><select id="info-cat-filter" class="input-field"></select></div>
+        <button type="button" class="btn btn-ghost btn-full" id="btn-import-open">📥 Importer des produits (Excel)</button>
         <div id="info-prod-list"></div>
       </div>
 
@@ -543,6 +544,24 @@
 </div>
 <datalist id="prod-stock-list"></datalist>
 <datalist id="prod-rayon-list"></datalist>
+
+<div class="modal-overlay" id="modal-import">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📥 Importer des produits (Excel)</div>
+    <div class="field"><label>Fichier .xlsx / .csv</label><input type="file" id="imp-file" accept=".xlsx,.xls,.csv"></div>
+    <div id="imp-config" class="hidden">
+      <div class="field"><label>Colonne « Nom »</label><select id="imp-col-name" class="input-field"></select></div>
+      <div class="field"><label>Colonne « Code-barres »</label><select id="imp-col-barcode" class="input-field"></select></div>
+      <div class="field"><label>Colonne « Fournisseur »</label><select id="imp-col-sup" class="input-field"></select></div>
+      <div class="field"><label>Colonne « Famille »</label><select id="imp-col-cat" class="input-field"></select></div>
+      <div id="imp-cat-map"></div>
+      <div id="imp-preview" class="imp-preview"></div>
+      <button type="button" class="btn btn-primary btn-full" id="imp-run">Importer</button>
+    </div>
+    <div id="imp-result"></div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-add-reserve">
   <div class="modal">

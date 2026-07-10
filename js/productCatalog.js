@@ -126,6 +126,32 @@ export function setProductDlcs(id, dlcs) {
   writeProductDlcs(p, dlcs);
 }
 
+// Import d'un produit depuis Excel : crée ou met à jour (par code-barres/nom)
+// SANS toucher à l'emplacement stock ni aux DLC (données propres à l'app).
+export function importProduct(row) {
+  if (!row.name || !app.firebaseMode) return "skip";
+  const p = findProduct(row.name, row.barcode);
+  if (p) {
+    const patch = {};
+    if (row.name && row.name !== p.name) patch.name = row.name;
+    if (row.barcode && (row.barcode || "").trim() && !(p.barcode || "").trim()) patch.barcode = row.barcode.trim();
+    if (row.supplier) patch.supplier = row.supplier;
+    if (row.category) patch.category = row.category;
+    if (Object.keys(patch).length) fbSet(`products/${p.id}`, { ...p, ...patch });
+    return "update";
+  }
+  fbPush("products", {
+    name: row.name,
+    barcode: (row.barcode || "").trim(),
+    supplier: row.supplier || "",
+    category: row.category || "",
+    emplacementStock: "",
+    emplacementRayon: "",
+    dlcs: [],
+  });
+  return "create";
+}
+
 export function showProductSuggestions(inputId, dropId, context) {
   const q = $(inputId).value.trim().toLowerCase();
   const drop = $(dropId);

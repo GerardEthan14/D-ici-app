@@ -73,6 +73,7 @@ import {
 } from "./stock.js";
 import { bindScanButtons } from "./scanner.js";
 import { switchInfoView, bindInfoEvents } from "./info.js";
+import { bindImportEvents } from "./productimport.js";
 import {
   addCount,
   saveEditCount,
@@ -221,6 +222,7 @@ function bindAll() {
   bindStockEvents();
   bindInventoryEvents();
   bindInfoEvents();
+  bindImportEvents();
   bindScanButtons();
   bindAdminEvents();
 }
