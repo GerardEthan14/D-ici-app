@@ -1246,3 +1246,15 @@
 .pe-dlc-row .pe-dlc-date { flex: 1; width: auto; }
 .pe-dlc-row .pe-dlc-qty { width: 74px; flex-shrink: 0; }
 .pe-dlc-del { flex-shrink: 0; width: 34px; }
+
+/* ── Import produits (Excel) ────────────────────────── */
+#imp-file { appearance: auto; -webkit-appearance: auto; padding: 9px; }
+.imp-status { padding: 10px 12px; border-radius: 10px; font-size: 0.86rem; margin-top: 10px; }
+.imp-status.ok { background: var(--green-light); color: var(--green); }
+.imp-status.err { background: var(--red-light); color: var(--red); }
+.imp-map-title { font-weight: 700; font-size: 0.75rem; color: var(--ink3); margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+#imp-cat-map { max-height: 38vh; overflow-y: auto; }
+.imp-map-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.imp-map-fam { flex: 1; font-size: 0.82rem; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-map-sel { width: 45%; flex-shrink: 0; }
+.imp-preview { font-size: 0.82rem; color: var(--ink3); margin: 10px 0; text-align: center; }
