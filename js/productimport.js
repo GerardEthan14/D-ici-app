@@ -234,10 +234,38 @@ async function runDedupe() {
   }
 }
 
+// Supprime TOUT le catalogue produit (irréversible) — pour repartir de l'Excel.
+async function deleteAllProducts() {
+  const n = SHARED.products.length;
+  if (!n) {
+    toast("Aucun produit à supprimer");
+    return;
+  }
+  const ans = prompt(
+    `⚠️ Supprimer TOUS les ${n} produits (emplacements + DLC compris) ?\n\nTape SUPPRIMER pour confirmer.`
+  );
+  if ((ans || "").trim().toUpperCase() !== "SUPPRIMER") {
+    toast("Annulé");
+    return;
+  }
+  const btn = $("btn-delete-all-products");
+  if (btn) btn.disabled = true;
+  try {
+    await fbRemove("products");
+    toast(`🗑️ ${n} produits supprimés`, true);
+    render.infoProducts?.();
+  } catch (e) {
+    toast("⚠️ Erreur pendant la suppression");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 export function bindImportEvents() {
   $("imp-file")?.addEventListener("change", onImportFile);
   $("imp-col-cat")?.addEventListener("change", renderCatMap);
   $("btn-import-open")?.addEventListener("click", openImport);
   $("imp-run")?.addEventListener("click", runImport);
   $("btn-dedupe")?.addEventListener("click", runDedupe);
+  $("btn-delete-all-products")?.addEventListener("click", deleteAllProducts);
 }
