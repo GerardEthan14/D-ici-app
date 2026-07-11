@@ -166,6 +166,7 @@ function subscribeAll() {
     render.zones?.();
     render.infoProducts?.();
     render.dlc?.();
+    render.suppliers?.();
   });
   _unsubscribers.push(unsubProducts);
 
