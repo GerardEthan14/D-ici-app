@@ -1,8 +1,9 @@
 import { $, esc, toast } from "./utils.js";
 import { SHARED, LOCAL, saveLocal } from "./state.js";
-import { fbPushOrLocal, fbRemoveOrLocal, fbUpdateOrLocal } from "./firebase.js";
+import { fbPushOrLocal, fbUpdateOrLocal } from "./firebase.js";
 import { gainXP, checkBadges } from "./rpg.js";
 import { closeModal, openModal } from "./modals.js";
+import { normName } from "./productCatalog.js";
 import { render } from "./bus.js";
 
 /* ── Type fournisseur (central / direct) ────────────── */
@@ -14,42 +15,52 @@ const TYPE_LABELS = {
 
 /* ── Suppliers ──────────────────────────────────────── */
 
+// La liste des fournisseurs est dérivée des PRODUITS (import Excel).
+// Chaque fournisseur reste éditable (fiche stockée par nom).
 export function renderSuppliers() {
   const el = $("sup-list");
   if (!el) return;
   const q = ($("sup-search")?.value || "").trim().toLowerCase();
-  let list = SHARED.suppliers;
-  if (q)
-    list = list.filter(
-      (s) =>
-        (s.name || "").toLowerCase().includes(q) ||
-        (s.contact || "").toLowerCase().includes(q) ||
-        (s.notes || "").toLowerCase().includes(q)
-    );
+
+  const names = new Map(); // clé normalisée -> nom affiché
+  SHARED.products.forEach((p) => {
+    const n = (p.supplier || "").trim();
+    if (n && !names.has(normName(n))) names.set(normName(n), n);
+  });
+  let list = [...names.entries()].map(([key, name]) => ({ key, name }));
+  if (q) list = list.filter((x) => x.name.toLowerCase().includes(q));
+  list.sort((a, b) => a.name.localeCompare(b.name));
+
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><p>${q ? "Aucun fournisseur trouvé." : "Aucune fiche fournisseur."}</p></div>`;
+    el.innerHTML = `<div class="empty-state"><p>${
+      q ? "Aucun fournisseur trouvé." : "Aucun fournisseur. Importe tes produits (Info → Produit → Importer) : les fournisseurs de l'Excel apparaîtront ici."
+    }</p></div>`;
     return;
   }
+
+  const pencil = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+
   el.innerHTML = list
-    .map(
-      (s) => `
-    <div class="sup-card">
-      <div class="sup-card-name">${esc(s.name)}
-        ${s.type && TYPE_LABELS[s.type] ? `<span class="sup-type-chip sup-type-${esc(s.type)}">${TYPE_LABELS[s.type]}</span>` : ""}
+    .map(({ key, name }) => {
+      const s = SHARED.suppliers.find((x) => normName(x.name) === key);
+      const count = SHARED.products.filter((p) => normName(p.supplier) === key).length;
+      const action = s ? `data-action="edit-sup" data-id="${esc(s.id)}"` : `data-action="new-sup" data-name="${esc(name)}"`;
+      return `<div class="sup-card">
+      <div class="sup-card-name">${esc(name)}
+        ${s && s.type && TYPE_LABELS[s.type] ? `<span class="sup-type-chip sup-type-${esc(s.type)}">${TYPE_LABELS[s.type]}</span>` : ""}
         <span class="sup-card-actions">
-          <button class="icon-btn icon-edit" data-action="edit-sup" data-id="${esc(s.id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-          <button class="icon-btn danger" data-action="del-sup" data-id="${esc(s.id)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
+          <button class="icon-btn icon-edit" ${action}>${pencil}</button>
         </span>
       </div>
       <div class="sup-grid">
-        <div class="sup-block"><div class="sup-block-lbl">📞 Contact</div><div class="sup-block-val">${esc(s.contact || "—")}</div></div>
-        <div class="sup-block"><div class="sup-block-lbl">📅 Livraison</div><div class="sup-block-val">${esc(s.day || "—")}</div></div>
-        <div class="sup-block"><div class="sup-block-lbl">🔀 Approvisionnement</div><div class="sup-block-val">${s.type && TYPE_LABELS[s.type] ? TYPE_LABELS[s.type] : "—"}</div></div>
-        <div class="sup-block"><div class="sup-block-lbl">🚚 Franco de port</div><div class="sup-block-val">${esc(s.franco || "—")}</div></div>
-        ${s.notes ? `<div class="sup-block sup-block-full"><div class="sup-block-lbl">📝 Notes</div><div class="sup-block-val">${esc(s.notes)}</div></div>` : ""}
+        <div class="sup-block"><div class="sup-block-lbl">📦 Produits</div><div class="sup-block-val">${count}</div></div>
+        <div class="sup-block"><div class="sup-block-lbl">📞 Contact</div><div class="sup-block-val">${esc((s && s.contact) || "—")}</div></div>
+        <div class="sup-block"><div class="sup-block-lbl">📅 Livraison</div><div class="sup-block-val">${esc((s && s.day) || "—")}</div></div>
+        <div class="sup-block"><div class="sup-block-lbl">🚚 Franco de port</div><div class="sup-block-val">${esc((s && s.franco) || "—")}</div></div>
+        ${s && s.notes ? `<div class="sup-block sup-block-full"><div class="sup-block-lbl">📝 Notes</div><div class="sup-block-val">${esc(s.notes)}</div></div>` : ""}
       </div>
-    </div>`
-    )
+    </div>`;
+    })
     .join("");
 }
 
@@ -58,11 +69,16 @@ export function bindSupplierEvents() {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
     if (btn.dataset.action === "edit-sup") openEditSupplier(btn.dataset.id);
-    else if (btn.dataset.action === "del-sup") {
-      if (confirm("Supprimer cette fiche ?"))
-        fbRemoveOrLocal("suppliers", btn.dataset.id);
-    }
+    else if (btn.dataset.action === "new-sup") openAddSupplier(btn.dataset.name);
   });
+}
+
+// Ouvre la fiche d'ajout, pré-remplie avec un nom (depuis un fournisseur dérivé).
+export function openAddSupplier(name) {
+  ["cs-name", "cs-contact", "cs-day", "cs-franco", "cs-notes"].forEach((i) => ($(i).value = ""));
+  $("cs-type").value = "";
+  if (name) $("cs-name").value = name;
+  openModal("modal-add-supplier");
 }
 
 export async function addSupplier() {
