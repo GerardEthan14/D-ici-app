@@ -68,7 +68,6 @@ import {
   switchStockView,
   addRayon,
   saveEditRayon,
-  addStockItem,
   bindStockEvents,
 } from "./stock.js";
 import { bindScanButtons } from "./scanner.js";
@@ -113,9 +112,10 @@ function bindAll() {
   bindClick("itab-fournisseur", () => switchInfoView("fournisseur"));
   $("sup-search")?.addEventListener("input", renderSuppliers);
 
-  // Stock sub-tabs (Réserve + Inventaire)
+  // Stock sub-tabs (Réserve + Inventaire + Roulement)
   bindClick("stab-reserve", () => switchStockView("reserve"));
   bindClick("stab-inventory", () => switchStockView("inventory"));
+  bindClick("stab-roulement", () => switchStockView("roulement"));
 
   // Todo tabs / filters
   bindClick("ttab-personal", () => switchTodoTab("personal"));
@@ -152,7 +152,6 @@ function bindAll() {
   bindClick("btn-add-supplier", addSupplier);
   bindClick("btn-add-rayon", addRayon);
   bindClick("btn-save-edit-rayon", saveEditRayon);
-  bindClick("btn-add-stock-item", addStockItem);
   bindClick("btn-add-count", addCount);
   bindClick("btn-save-edit-count", saveEditCount);
   bindClick("btn-gen-label", generateLabel);

@@ -34,6 +34,8 @@ export const SHARED = {
   zones: {},
   rayons: [],
   stockItems: [],
+  rayonChecks: [],
+  roulementMeta: {},
   invCounts: [],
   invZones: {},
   invMeta: {},
