@@ -219,6 +219,7 @@
       <div class="sub-tabs">
         <button class="sub-tab active" id="stab-reserve">🏠 Réserve</button>
         <button class="sub-tab" id="stab-inventory">📦 Inventaire</button>
+        <button class="sub-tab" id="stab-roulement">🔁 Roulement</button>
       </div>
       <div id="stock-reserve-view">
         <button class="btn btn-ghost btn-full btn-map-toggle" id="btn-toggle-map">
@@ -242,6 +243,7 @@
         </button>
       </div>
       <div id="stock-inventory-view" class="hidden"></div>
+      <div id="stock-roulement-view" class="hidden"></div>
     </section>
 
     <!-- PROFIL -->
@@ -427,6 +429,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title">🗂️ Nouveau rayon</div>
     <div class="field"><label>Nom du rayon</label><input type="text" id="ray-name" placeholder="ex : Crèmerie, Boissons, Épicerie…" autocomplete="off"></div>
+    <div class="field"><label>Durée (semaines)</label><input type="number" id="ray-weeks" min="1" max="8" value="1" inputmode="numeric"></div>
     <button class="btn btn-primary btn-full" id="btn-add-rayon">Créer le rayon</button>
   </div>
 </div>
@@ -437,6 +440,7 @@
     <div class="modal-title">✏️ Modifier le rayon</div>
     <input type="hidden" id="edit-ray-id">
     <div class="field"><label>Nom du rayon</label><input type="text" id="edit-ray-name" autocomplete="off"></div>
+    <div class="field"><label>Durée (semaines)</label><input type="number" id="edit-ray-weeks" min="1" max="8" value="1" inputmode="numeric"></div>
     <button class="btn btn-primary btn-full" id="btn-save-edit-rayon">Enregistrer</button>
   </div>
 </div>

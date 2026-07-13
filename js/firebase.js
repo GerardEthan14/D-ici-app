@@ -127,7 +127,7 @@ export async function fbUpdateOrLocal(collection, id, data) {
 
 /* ── Subscriptions ──────────────────────────────────── */
 
-const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac", "rayons", "stockItems", "invCounts"];
+const STORE_COLLECTIONS = ["dlc", "suppliers", "reserve", "vrac", "rayons", "stockItems", "rayonChecks", "invCounts"];
 
 function unsubscribeAll() {
   _unsubscribers.forEach((unsub) => unsub());
@@ -139,6 +139,7 @@ function unsubscribeAll() {
   SHARED.zones = {};
   SHARED.invZones = {};
   SHARED.invMeta = {};
+  SHARED.roulementMeta = {};
 }
 
 function subscribeAll() {
@@ -214,6 +215,12 @@ function subscribeAll() {
     render.inventory?.();
   });
   _unsubscribers.push(unsubInvMeta);
+
+  const unsubRoul = onValue(ref(app.db, sp("roulementMeta")), (snap) => {
+    SHARED.roulementMeta = snap.val() || {};
+    render.roulement?.();
+  });
+  _unsubscribers.push(unsubRoul);
 
   onValue(
     ref(app.db, sp("renames/" + app.username)),
