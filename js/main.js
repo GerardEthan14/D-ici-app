@@ -73,6 +73,7 @@ import {
 import { bindScanButtons } from "./scanner.js";
 import { switchInfoView, bindInfoEvents } from "./info.js";
 import { bindImportEvents } from "./productimport.js";
+import { bindReassortEvents } from "./reassort.js";
 import {
   addCount,
   saveEditCount,
@@ -103,7 +104,7 @@ function bindComboInputs(pairs, handler) {
 
 function bindAll() {
   // Nav
-  ["todo", "dlc", "info", "stock", "profil"].forEach((p) =>
+  ["todo", "dlc", "info", "stock", "reassort", "profil"].forEach((p) =>
     bindClick("nav-" + p, () => switchPanel(p))
   );
 
@@ -222,6 +223,7 @@ function bindAll() {
   bindInventoryEvents();
   bindInfoEvents();
   bindImportEvents();
+  bindReassortEvents();
   bindScanButtons();
   bindAdminEvents();
 }
