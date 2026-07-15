@@ -39,6 +39,7 @@ export const SHARED = {
   invCounts: [],
   invZones: {},
   invMeta: {},
+  reassort: [],
 };
 
 export const app = {

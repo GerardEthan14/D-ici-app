@@ -4,7 +4,7 @@ import { renderAdminPanel, renderLeaderboard } from "./profil.js";
 import { getDlcView } from "./dlc.js";
 import { render } from "./bus.js";
 
-const PANELS = ["todo", "dlc", "info", "stock", "profil"];
+const PANELS = ["todo", "dlc", "info", "stock", "reassort", "profil"];
 
 let currentPanel = "todo";
 export function getCurrentPanel() {
@@ -25,6 +25,7 @@ export function switchPanel(p) {
   }
   if (p === "stock") render.stock?.();
   if (p === "info") render.info?.();
+  if (p === "reassort") render.reassort?.();
   updateFabVisibility();
 }
 
